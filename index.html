@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>young1337</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #eee; }
+    header {
+      position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      background: rgba(18, 18, 18, 0.9); display: flex; align-items: center;
+      padding: 0 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 1000;
+    }
+    .logo {
+      font-family: 'Rock Salt', cursive; font-size: 3rem; color: #fff; user-select: none;
+      text-shadow: 1px 1px 0 #000, 2px 2px 3px rgba(0,0,0,0.6); margin-right: 28px;
+    }
+    .header-nav { display: flex; align-items: center; gap: 10px; }
+    .app-button {
+      font-family: inherit; font-size: 1.1rem; color: #fff;
+      background: transparent; border: none; padding: 8px 18px; border-radius: 6px;
+      cursor: pointer; user-select: none; transition: background-color 0.3s ease;
+      display: flex; align-items: center; height: 38px;
+    }
+    .app-button:hover { 
+      /* Оптимизированный эффект для быстродействия */
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      box-shadow: 0 2px 8px 0 rgba(80,180,255,0.10);
+      backdrop-filter: blur(6px) saturate(120%) brightness(1.08) contrast(1.04);
+      -webkit-backdrop-filter: blur(6px) saturate(120%) brightness(1.08) contrast(1.04);
+      transition: background 0.18s, box-shadow 0.18s, border 0.18s;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .app-button:hover::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(80,180,255,0.09) 100%);
+      opacity: 0.5;
+      filter: blur(1.5px);
+      z-index: 1;
+    }
+    .app-button:active {
+      background: rgba(255,255,255,0.16);
+      box-shadow: 0 1px 6px 0 rgba(80,180,255,0.13) inset;
+    }
+    .app-button.disabled {
+      background: transparent !important; color: #888 !important; cursor: default !important;
+      opacity: 1 !important; pointer-events: auto; border: none;
+    }
+    .app-button.disabled:hover { background: transparent !important; color: #888 !important; }
+    main { padding-top: 80px; text-align: center; }
+    .hidden { display: none !important; }
+    .modal {
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center;
+    }
+    .modal-content-gray {
+      background: #23272e;
+      border-radius: 14px;
+      padding: 48px 44px 38px 44px;
+      min-width: 380px;
+      max-width: 420px;
+      color: #eee;
+      text-align: center;
+      /* Быстродействие: без box-shadow, transition и сложных эффектов */
+      box-shadow: none !important;
+      transition: none !important;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #loginModal .modal-content-gray,
+    #registerModal .modal-content-gray {
+      min-width: 400px;
+      max-width: 440px;
+      padding: 32px 32px 24px 32px;
+      box-sizing: border-box;
+      align-items: center;
+    }
+    .modal-content-gray h2 {
+      color: #eee;
+      margin-bottom: 18px;
+      font-size: 1.45em;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+    }
+    .input-gray {
+      width: 100%;
+      margin-bottom: 18px;
+      padding: 12px 12px;
+      font-size: 1.13em;
+      border-radius: 9px;
+      border: 1.5px solid #444;
+      background: #2e323a;
+      color: #fff;
+      outline: none;
+      transition: border-color .17s, box-shadow .17s, background .18s;
+    }
+    .input-gray:focus {
+      border-color: #666;
+      background: #353942;
+      box-shadow: 0 0 4px #8885;
+    }
+    .modal-content-gray .close-btn {
+      position: absolute; right: 16px; top: 14px; font-size: 1.6rem; color: #aaa; background: none; border: none; cursor: pointer; transition: color .17s;
+    }
+    .modal-content-gray .close-btn:hover { color: #fff; }
+    .modal-main-btn {
+      width: 100%;
+      background: transparent;
+      color: #fff;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 1.13em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 12px 0;
+      transition: background .18s, color .18s;
+      box-shadow: 0 3px 16px #0003;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-main-btn:hover,
+    .modal-main-btn:focus {
+      background: rgba(128, 128, 128, 0.19);
+      color: #fff;
+    }
+    #banUserModal .modal-content-gray {
+      background: #232015;
+      border-radius: 14px;
+      min-width: 320px;
+      color: #eee;
+      text-align: center;
+      box-shadow: 0 8px 40px #000a;
+      border: 1px solid #5e472a;
+    }
+    #banUserModal input, #banUserModal select {
+      margin-bottom: 14px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      border: 1px solid #5e472a;
+      background: #3b2414;
+      color: #fff;
+      width: 100%;
+    }
+    #banUserModal .modal-main-btn {
+      background: #c2a176;
+      color: #222;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    #banUserModal .ban-form-label {
+      color: #c2a176;
+      margin-bottom: 7px;
+      font-size: 1.01em;
+      font-weight: 600;
+      display: block;
+      text-align: left;
+      width: 100%;
+    }
+    #bannedModal .modal-content-gray {
+      background: #3b2414;
+      border: 2px solid #c2a176;
+      color: #c2a176;
+    }
+    .modal-content {
+      background: #222; padding: 24px 28px 24px 28px; border-radius: 12px;
+      max-width: 400px; width: 95%; color: #eee; text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.8);
+    }
+    .close-btn {
+      cursor: pointer; font-size: 1.6rem; font-weight: bold; color: #aaa; user-select: none;
+      align-self: flex-end; margin-bottom: 8px;
+      border: none; background: none;
+      transition: color 0.15s;
+    }
+    .close-btn:hover { color: #fff; }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #1e1e1e; margin: 6px auto 8px;
+      display: block; border: 2px solid #3fa7ff;
+      /* Убираем box-shadow и уменьшаем размер для ускорения */
+    }
+    #changeAvatarLabel {
+      display: inline-block; color: #3fa7ff; cursor: pointer; font-size: 1em; margin-top: 4px;
+      /* Без transition и лишних эффектов */
+    }
+    .profile-row {
+      margin: 10px 0 0 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Без лишних теней и анимаций */
+    }
+    #nicknameStaticView, #nicknameForm, #passwordForm {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      /* Без transition */
+    }
+    #nicknameInput, #newPasswordInput {
+      width: 120px;
+      font-size: 1rem;
+      padding: 4px 7px;
+      border-radius: 5px;
+      border: 1px solid #3fa7ff;
+      background: #23272e;
+      color: #fff;
+      /* Без box-shadow, минимальный transition */
+      transition: border-color 0.12s;
+    }
+    #nicknameInput:focus, #newPasswordInput:focus {
+      outline: none;
+      border-color: #66d3fa;
+    }
+    #saveNicknameBtn, #cancelNicknameBtn, #changePasswordBtn {
+      padding: 6px 16px;
+      min-width: 80px;
+      font-size: 0.97rem;
+      border-radius: 5px;
+      border: none;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      /* Без box-shadow и сложных transition */
+    }
+    #logoutBtn {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 10px 0;
+      border-radius: 7px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 18px;
+      font-size: 1.03rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      /* Без box-shadow и градиентов */
+      transition: background 0.12s;
+    }
+    #logoutBtn:hover {
+      background: #c0392b;
+      color: #fff;
+      filter: none;
+    }
+    .role-label {
+      display: inline-block;
+      background: #333950;
+      color: #3fa7ff;
+      font-size: .95em;
+      padding: 2px 10px;
+      border-radius: 10px;
+      margin-left: 7px;
+      margin-right: 0;
+      font-weight: 500;
+      vertical-align: middle;
+      /* Без transition */
+    }
+    .role-admin { background: #2d1e36; color: #ff7d7d; }
+    .role-user { background: #22332d; color: #3fcf7f; }
+    .role-moder { background: #2d2a1e; color: #ffe27d; }
+    .role-govnar { background: #3b2414; color: #c2a176; }
+    #adminUserList {
+      width: 100%;
+      background: #181b24;
+      border-radius: 8px;
+      padding: 10px 4px 10px 4px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      box-sizing: border-box;
+      font-size: 0.98em;
+    }
+    .admin-user-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #292c36;
+      padding: 5px 5px 5px 1px;
+    }
+    .admin-user-item:last-child { border-bottom: none;}
+    .admin-user-nick { color: #3fa7ff; font-size: 1em; margin-right: 6px; font-weight: 600; }
+    .admin-user-role { margin-right: 5px; }
+    .admin-user-select {
+      background: #23272e;
+      color: #fff;
+      border: 1px solid #3fa7ff;
+      border-radius: 5px;
+      padding: 2px 5px;
+      font-size: .97em;
+      margin-left: 8px;
+    }
+    .admin-ban-btn, .admin-unban-btn {
+      background: #c2a176;
+      color: #3b2414;
+      border: none;
+      border-radius: 7px;
+      padding: 3px 16px;
+      font-size: 0.98em;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 8px;
+      transition: background .2s, color .2s;
+    }
+    .admin-ban-btn:hover { background: #a8824c; color: #fff; }
+    .admin-unban-btn:hover { background: #7c5831; color: #fff; }
+    #moderPanel {
+      display:none;width:100%;
+      background: #181b24;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      box-sizing: border-box;
+      font-size: 0.98em;
+    }
+    #moderUserList .moder-user-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #292c36;
+      padding: 3px 5px 3px 1px;
+    }
+    #moderUserList .moder-user-item:last-child { border-bottom: none;}
+    .moder-user-nick { color: #3fa7ff; font-size: 1em; margin-right: 6px; font-weight: 600; }
+    .moder-ban-btn {
+      background: #c2a176;
+      color: #3b2414;
+      border: none;
+      border-radius: 7px;
+      padding: 3px 16px;
+      font-size: 0.98em;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 8px;
+      transition: background .2s, color .2s;
+    }
+    .moder-ban-btn:hover { background: #a8824c; color: #fff; }
+    #toastNotify {
+      position: fixed; left: 50%; top: 24px; transform: translateX(-50%); z-index: 4000;
+      background: #23272e; color: #fff; padding: 16px 32px; border-radius: 12px; font-size: 1.1rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25); opacity: 0; pointer-events: none;
+      transition: opacity 0.4s, top 0.4s;
+    }
+    #toastNotify.show { opacity: 1; top: 40px; pointer-events: auto; }
+    #chatPanel {
+      display: none; position: fixed; z-index: 1500; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.45); justify-content: center; align-items: flex-start;
+    }
+    #chatPanel.active { display: flex; }
+    #chatPanel .chat-content {
+      display: flex; flex-direction: column; height: 80vh; max-width: 900px; width: 95vw; margin: auto;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.7); background: #222; border-radius: 10px; padding: 28px 54px;
+    }
+    #chatMessages > div {
+      display: flex; align-items: center; gap: 10px; padding: 4px 8px; border-bottom: 1px solid #444;
+    }
+    .chat-avatar {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #1e1e1e; border:1px solid #333;
+    }
+    #chatMessages span.nickname { color: #3fa7ff; font-weight: bold; }
+    #chatMessages span.time { color: #888; font-size: 0.95em; }
+    #chatMessages span.text { color: #fff; margin-left: 8px; word-break: break-word; }
+    .chat-role-badge {
+      font-size: 0.83em;
+      background: #333950;
+      color: #5cb7ff;
+      border-radius: 8px;
+      padding: 1px 9px;
+      margin-left: 6px;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+    .chat-role-admin { background: #2d1e36; color: #ff7d7d; }
+    .chat-role-moder { background: #2d2a1e; color: #ffe27d; }
+    .chat-role-user { background: #22332d; color: #3fcf7f; }
+    .chat-role-govnar { background: #3b2414; color: #c2a176; }
+    .chat-del-btn {
+      background: transparent;
+      border: none;
+      color: #e74c3c;
+      font-size: 1.13em;
+      margin-left: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .18s, color .13s;
+      padding: 2px 6px 0 6px;
+      display: flex;
+      align-items: center;
+    }
+    .chat-del-btn:hover { background:#e74c3c; color:#fff; }
+    .chat-edit-btn {
+      background: transparent;
+      border: none;
+      color: #3fa7ff;
+      font-size: 1.13em;
+      margin-left: 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .18s, color .13s;
+      padding: 2px 6px 0 6px;
+      display: flex;
+      align-items: center;
+    }
+    .chat-edit-btn:hover { background:#3fa7ff44; color:#fff; }
+    .msg-edited {
+      color:#888; font-size:0.97em; margin-left:5px; font-style:italic;
+      user-select: none;
+    }
+    .edit-message-form {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      margin-left: 52px;
+      margin-bottom: 7px;
+    }
+    .edit-message-input {
+      flex-grow: 1;
+      font-size: 1.01em;
+      border-radius: 6px;
+      border: 1.2px solid #3fa7ff;
+      background: #23272e;
+      color: #fff;
+      outline: none;
+      transition: border-color .17s;
+      min-width: 0;
+      resize: none;
+      overflow: hidden;
+      padding: 6px 8px;
+      box-sizing: border-box;
+    }
+    .edit-message-save, .edit-message-cancel {
+      padding: 6px 14px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .edit-message-save { background:#3fa7ff; color:#222;}
+    .edit-message-save:hover { background:#256a9f; color:#fff; }
+    .edit-message-cancel { background:#e74c3c; color:#fff;}
+    .edit-message-cancel:hover { background:#c0392b;}
+    /* --- ОПТИМИЗАЦИЯ ДЛЯ БЫСТРОДЕЙСТВИЯ --- */
+    body, html {
+      scroll-behavior: auto;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-button, .modal-main-btn, #logoutBtn, .edit-nick-btn, .admin-ban-btn, .admin-unban-btn, .admin-del-btn, .moder-ban-btn {
+      transition: none !important;
+      box-shadow: none !important;
+      filter: none !important;
+      outline: none !important;
+    }
+    .app-button, .modal-main-btn, #logoutBtn {
+      will-change: background, color;
+    }
+    .modal, .modal-content, .modal-content-gray {
+      box-shadow: none !important;
+      transition: none !important;
+    }
+    .profile-avatar, .chat-avatar {
+      box-shadow: none !important;
+      filter: none !important;
+      transition: none !important;
+    }
+    .profile-avatar, .chat-avatar {
+      width: 60px !important; height: 60px !important;
+    }
+    .modal-content, .modal-content-gray {
+      padding: 18px 12px 18px 12px !important;
+    }
+    .input-gray, #nicknameInput, #newPasswordInput {
+      box-shadow: none !important;
+      transition: border-color 0.1s !important;
+    }
+    .input-gray:focus, #nicknameInput:focus, #newPasswordInput:focus {
+      box-shadow: none !important;
+    }
+    .profile-row, #nicknameStaticView, #nicknameForm, #passwordForm {
+      box-shadow: none !important;
+      transition: none !important;
+    }
+    #chatMessages > div {
+      transition: none !important;
+      box-shadow: none !important;
+    }
+    /* Убираем лишние эффекты для всех кнопок */
+    button, .app-button, .modal-main-btn {
+      transition: none !important;
+      box-shadow: none !important;
+      filter: none !important;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">young1337</div>
+  <nav class="header-nav">
+    <button class="app-button" id="openProfile" style="display:none;">Профиль</button>
+    <button class="app-button" id="openLogin">Вход</button>
+    <button class="app-button" id="openRegister">Регистрация</button>
+    <button class="app-button" id="openFriends">Друзья</button>
+    <button class="app-button" id="openNews">Посты</button>
+    <button class="app-button disabled" id="openChat">Чат</button>
+    <button class="app-button" id="openShorts">1337Shorts</button>
+  </nav>
+</header>
+<main id="mainContent">
+  <h1>Привет!</h1>
+</main>
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+  <div class="modal-content-gray">
+    <button class="close-btn" id="closeLogin" title="Закрыть">×</button>
+    <h2>Вход</h2>
+    <input type="email" id="loginEmail" placeholder="Email" class="input-gray">
+    <input type="password" id="loginPassword" placeholder="Пароль" class="input-gray">
+    <button class="app-button modal-main-btn" id="loginSubmit">Войти</button>
+  </div>
+</div>
+<!-- REGISTER MODAL -->
+<div id="registerModal" class="modal">
+  <div class="modal-content-gray">
+    <button class="close-btn" id="closeRegister" title="Закрыть">×</button>
+    <h2>Регистрация</h2>
+    <input type="email" id="registerEmail" placeholder="Email" class="input-gray">
+    <input type="password" id="registerPassword" placeholder="Пароль" class="input-gray">
+    <button class="app-button modal-main-btn" id="registerSubmit">Зарегистрироваться</button>
+  </div>
+</div>
+<!-- PROFILE MODAL -->
+<div id="profileModal" class="modal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeProfile" title="Закрыть">×</button>
+    <img src="" class="profile-avatar" id="profileAvatar" alt="avatar">
+    <button id="changeAvatarBtn" class="app-button" style="margin-bottom:8px;">Сменить аватар</button>
+    <input type="file" id="changeAvatarInput" accept="image/*" style="display:none;" />
+    <div class="profile-row">
+      <div id="nicknameStaticView">
+        <span class="profile-nick-static" id="profileNickname"></span>
+        <span id="profileRoleBadge" class="role-label">Пользователь</span>
+        <button id="editNicknameBtn" class="edit-nick-btn" title="Изменить ник">✏️</button>
+      </div>
+      <form id="nicknameForm" style="display:none;">
+        <input type="text" id="nicknameInput" maxlength="18" autocomplete="off" />
+        <button type="submit" id="saveNicknameBtn">Сохранить</button>
+        <button type="button" id="cancelNicknameBtn">Отмена</button>
+      </form>
+    </div>
+    <div class="profile-row">Почта: <span id="profileEmail"></span></div>
+    <div class="profile-row">
+      Ваш ID : <span id="profileUserId" style="color:#3fa7ff;font-weight:bold;"></span>
+    </div>
+    <form id="passwordForm" autocomplete="off">
+      <input type="password" id="newPasswordInput" placeholder="Новый пароль" minlength="6" required />
+      <button type="submit" id="changePasswordBtn">Сменить пароль</button>
+    </form>
+    <div id="adminPanel" style="display:none; width:100%;">
+      <h3 style="color:#fff;margin:16px 0 7px 0;font-size:1.12em;">Панель администратора</h3>
+      <div id="adminUserList"></div>
+    </div>
+    <button id="logoutBtn">Выйти</button>
+  </div>
+</div>
+<!-- CHAT PANEL -->
+<div id="chatPanel" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1500;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,0.45);">
+  <div class="chat-modal-window" style="display:flex;flex-direction:row;gap:0;box-shadow:0 4px 32px rgba(0,0,0,0.7);background:#222;border-radius:12px;max-width:1100px;width:95vw;height:80vh;margin-top:60px;overflow:hidden;">
+    <!-- Левая панель выбора чата -->
+    <div id="chatList" style="width:240px;min-width:160px;max-height:100%;overflow-y:auto;background:#181b24;border-radius:12px 0 0 12px;padding:0;display:flex;flex-direction:column;align-items:stretch;">
+      <div style="padding:18px 18px 8px 18px;font-weight:bold;color:#aaa;font-size:1.07em;">Чаты</div>
+      <div id="globalChatBtn" class="chat-list-item selected" style="padding:10px 18px;cursor:pointer;font-weight:bold;color:#3fa7ff;border-radius:6px;margin:0 8px 8px 8px;background:#23272e;display:flex;align-items:center;">
+        🌐 Глобальный чат
+      </div>
+    </div>
+    <!-- Сообщения и ввод -->
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;align-items:stretch;">
+      <div id="chatMessages" style="flex-grow:1;overflow-y:auto;padding:10px;min-width:0;max-height:100%;background:transparent;box-sizing:border-box;"></div>
+      <div style="display:flex;gap:10px;margin:14px 14px 14px 14px;">
+        <input type="text" id="chatInput" placeholder="Ваше сообщение..." style="flex-grow:1;padding:10px;border-radius:6px;border:1px solid #555;background:#333;color:#eee;">
+        <button class="app-button" id="chatSend">Отправить</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toastNotify"></div>
+<!-- MODAL BAN USER -->
+<div id="banUserModal" class="modal">
+  <div class="modal-content-gray">
+    <button class="close-btn" id="closeBanModal" title="Закрыть">×</button>
+    <h2>Заблокировать пользователя</h2>
+    <label class="ban-form-label" for="banDurationInput">Время блокировки (минуты):</label>
+    <input type="number" id="banDurationInput" min="1" max="10080" placeholder="Минут (от 1 до 10080)">
+    <label class="ban-form-label" for="banReasonSelect">Причина:</label>
+    <select id="banReasonSelect">
+      <option value="" disabled selected>Выберите причину</option>
+      <option value="Мат/Оскорбления">Мат/Оскорбления</option>
+      <option value="Спам">Спам</option>
+      <option value="Реклама">Реклама</option>
+      <option value="Другое">Другое</option>
+    </select>
+    <input type="text" id="banCustomReason" placeholder="Своя причина (опционально)">
+    <button class="modal-main-btn" id="banSubmitBtn">Забанить</button>
+  </div>
+</div>
+<!-- MODAL FOR BANNED USER -->
+<div id="bannedModal" class="modal">
+  <div class="modal-content-gray">
+    <h2>Вы заблокированы</h2>
+    <div id="bannedReason"></div>
+    <div id="bannedTime"></div>
+    <div id="bannedBy"></div>
+    <div id="bannedTime"></div>
+    <div id="bannedBy"></div>
+    <button class="modal-main-btn" id="bannedCloseBtn">Не хорошо</button>
+  </div>
+</div>
+<!-- FRIENDS MODAL -->
+<div id="friendsModal" class="modal">
+  <div class="modal-content-gray">
+    <button class="close-btn" id="closeFriends" title="Закрыть">×</button>
+    <h2>Друзья <span id="friendsNotif" style="display:none;margin-left:8px;"><span style="display:inline-block;width:12px;height:12px;background:#e74c3c;border-radius:50%;"></span></span></h2>
+    <div style="margin-bottom:12px;">
+      <input type="text" id="friendIdInput" maxlength="8" placeholder="Введите ID друга (4 цифры)" class="input-gray" style="width:140px;display:inline-block;">
+      <button class="modal-main-btn" id="findFriendBtn" style="width:auto;padding:8px 18px;margin-left:8px;">Найти</button>
+    </div>
+    <div id="friendSearchResult"></div>
+    <div style="margin-top:18px;">
+      <h3 style="color:#3fa7ff;font-size:1.08em;margin-bottom:6px;">Заявки в друзья</h3>
+      <div id="friendRequestsList"></div>
+    </div>
+    <div style="margin-top:18px;">
+      <h3 style="color:#3fcf7f;font-size:1.08em;margin-bottom:6px;">Список друзей</h3>
+      <div id="friendsList"></div>
+    </div>
+  </div>
+</div>
+<!-- NEWS MODAL -->
+<div id="newsModal" class="modal">
+  <div class="modal-content-gray" style="min-width:340px;max-width:500px;">
+    <button class="close-btn" id="closeNews" title="Закрыть">×</button>
+    <h2>Новости и обновления</h2>
+    <div id="newsContent" style="text-align:left;min-height:90px;padding:8px 0 0 0;">
+      <!-- Здесь пишите последние добавления -->
+      <ul style="padding-left:18px;">
+        <li>06-08-2025 - Новое обновление. Разрабу хуево поэтому он наделал говна и чат не работает!
+          (только с друзьями) сделаны 1337Shorts у меня работали на говяном инете, мне лень дальше писать 
+          баг фикс и прочая залупа в 1.3 билде
+          1.2 Build beta 1
+        </li>
+      </ul>
+     </div>
+  </div>
+</div>
+<!-- 1337Shorts MODAL -->
+<div id="shortsModal" class="modal">
+  <div class="shorts-content">
+    <div class="shorts-header">
+      <span style="font-size:1.3em;font-weight:bold;">1337Shorts</span>
+      <button id="shortsPublishBtn" class="shorts-publish-btn" title="Опубликовать шортс">+</button>
+      <button class="close-btn" id="closeShorts" title="Закрыть" style="right:12px;top:10px;">×</button>
+    </div>
+    <div class="shorts-scroll" id="shortsScroll"></div>
+  </div>
+</div>
+<!-- Модалка публикации шортса -->
+<div id="shortsPublishModal" class="modal">
+  <div class="modal-content-gray" style="min-width:320px;max-width:380px;">
+    <button class="close-btn" id="closeShortsPublish" title="Закрыть">×</button>
+    <h2>Опубликовать шортс</h2>
+    <input type="file" id="shortsVideoInput" accept="video/*" style="margin-bottom:12px;">
+    <input type="text" id="shortsDescInput" maxlength="80" placeholder="Описание (до 80 символов)" class="input-gray">
+    <button class="modal-main-btn" id="shortsSubmitBtn">Опубликовать</button>
+  </div>
+</div>
+
+<style>
+/* ...existing code... */
+.shorts-content {
+  background: #181b24;
+  border-radius: 18px;
+  min-width: 340px;
+  max-width: 370px;
+  width: 98vw;
+  height: 92vh;
+  max-height: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  box-shadow: 0 8px 32px #000a;
+  padding: 0;
+}
+.shorts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 18px 8px 18px;
+  border-bottom: 1px solid #23272e;
+  background: #23272e;
+  border-radius: 18px 18px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.shorts-publish-btn {
+  background: #4a5055;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 2em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shorts-publish-btn:hover { background: #525960; }
+.shorts-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+  background: #181b24;
+  border-radius: 0 0 18px 18px;
+}
+.shorts-video-block {
+  background: #23272e;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #0005;
+  padding: 0 0 12px 0;
+  width: 98%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.shorts-video {
+  width: 100%;
+  max-height: 340px;
+  border-radius: 14px 14px 0 0;
+  background: #111;
+  object-fit: cover;
+}
+.shorts-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  width: 92%;
+}
+.shorts-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1e1e1e;
+  border: 2px solid #3fa7ff;
+}
+.shorts-nick {
+  color: #3fa7ff;
+  font-weight: bold;
+  font-size: 1.07em;
+}
+.shorts-desc {
+  color: #fff;
+  font-size: 1em;
+  margin-top: 2px;
+  word-break: break-word;
+  max-width: 210px;
+}
+@media (max-width: 500px) {
+  .shorts-content { max-width: 99vw; min-width: 0; }
+  .shorts-video-block { max-width: 99vw; }
+}
+/* ...existing code... */
+</style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, set, update, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updatePassword
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjTaleNo3RlfJECEEm24UGg4sx6AFvp7E",
+  authDomain: "young1337-c6a15.firebaseapp.com",
+  databaseURL: "https://young1337-c6a15-default-rtdb.firebaseio.com",
+  projectId: "young1337-c6a15",
+  storageBucket: "young1337-c6a15.appspot.com",
+  messagingSenderId: "349710701737",
+  appId: "1:349710701737:web:c9f5e5e86d0b29dc6b05b8",
+  measurementId: "G-DXVL8D5L44"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
+
+const ADMIN_EMAIL = "timurnazaev001@gmail.com";
+const ROLE_LABELS = {
+  admin: "Админ",
+  user: "Пользователь",
+  moder: "Модератор",
+  govnar: "Говнарь"
+};
+const ROLE_CLASS = {
+  admin: "role-admin",
+  user: "role-user",
+  moder: "role-moder",
+  govnar: "role-govnar"
+};
+const CHAT_ROLE_CLASS = {
+  admin: "chat-role-badge chat-role-admin",
+  user: "chat-role-badge chat-role-user",
+  moder: "chat-role-badge chat-role-moder",
+  govnar: "chat-role-badge chat-role-govnar"
+};
+
+const openProfileBtn = document.getElementById('openProfile');
+const loginBtn = document.getElementById('openLogin');
+const registerBtn = document.getElementById('openRegister');
+const openFriendsBtn = document.getElementById('openFriends');
+const chatBtn = document.getElementById('openChat');
+const chatPanel = document.getElementById('chatPanel');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const loginModal = document.getElementById('loginModal');
+const registerModal = document.getElementById('registerModal');
+const closeLoginBtn = document.getElementById('closeLogin');
+const closeRegisterBtn = document.getElementById('closeRegister');
+const profileModal = document.getElementById('profileModal');
+const profileEmail = document.getElementById('profileEmail');
+const profileNickname = document.getElementById('profileNickname');
+const editNicknameBtn = document.getElementById('editNicknameBtn');
+const nicknameStaticView = document.getElementById('nicknameStaticView');
+const nicknameForm = document.getElementById('nicknameForm');
+const nicknameInput = document.getElementById('nicknameInput');
+const saveNicknameBtn = document.getElementById('saveNicknameBtn');
+const cancelNicknameBtn = document.getElementById('cancelNicknameBtn');
+const profileAvatar = document.getElementById('profileAvatar');
+const changeAvatarInput = document.getElementById('changeAvatarInput');
+// заменяем label на кнопку
+const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const closeProfileBtn = document.getElementById('closeProfile');
+const toast = document.getElementById('toastNotify');
+const passwordForm = document.getElementById('passwordForm');
+const newPasswordInput = document.getElementById('newPasswordInput');
+const changePasswordBtn = document.getElementById('changePasswordBtn');
+const adminPanel = document.getElementById('adminPanel');
+const adminUserList = document.getElementById('adminUserList');
+const profileRoleBadge = document.getElementById('profileRoleBadge');
+const banUserModal = document.getElementById('banUserModal');
+const closeBanModalBtn = document.getElementById('closeBanModal');
+const banDurationInput = document.getElementById('banDurationInput');
+const banReasonSelect = document.getElementById('banReasonSelect');
+const banCustomReason = document.getElementById('banCustomReason');
+const banSubmitBtn = document.getElementById('banSubmitBtn');
+const bannedModal = document.getElementById('bannedModal');
+const bannedReasonDiv = document.getElementById('bannedReason');
+const bannedTimeDiv = document.getElementById('bannedTime');
+const bannedByDiv = document.getElementById('bannedBy');
+const bannedCloseBtn = document.getElementById('bannedCloseBtn');
+const mainContent = document.getElementById('mainContent');
+const friendsModal = document.getElementById('friendsModal');
+const closeFriendsBtn = document.getElementById('closeFriends');
+const friendIdInput = document.getElementById('friendIdInput');
+const findFriendBtn = document.getElementById('findFriendBtn');
+const friendSearchResult = document.getElementById('friendSearchResult');
+const friendRequestsList = document.getElementById('friendRequestsList');
+const friendsList = document.getElementById('friendsList');
+const friendsNotif = document.getElementById('friendsNotif');
+const openNewsBtn = document.getElementById('openNews');
+const newsModal = document.getElementById('newsModal');
+const closeNewsBtn = document.getElementById('closeNews');
+const openShortsBtn = document.getElementById('openShorts');
+const shortsModal = document.getElementById('shortsModal');
+const closeShortsBtn = document.getElementById('closeShorts');
+const shortsScroll = document.getElementById('shortsScroll');
+const shortsPublishBtn = document.getElementById('shortsPublishBtn');
+const shortsPublishModal = document.getElementById('shortsPublishModal');
+const closeShortsPublish = document.getElementById('closeShortsPublish');
+const shortsVideoInput = document.getElementById('shortsVideoInput');
+const shortsDescInput = document.getElementById('shortsDescInput');
+const shortsSubmitBtn = document.getElementById('shortsSubmitBtn');
+
+function showToast(message, type = 'info') {
+  toast.textContent = message;
+  toast.style.background = type === 'success' ? '#23272e' :
+                          type === 'error'   ? '#2e2323' : '#23272e';
+  toast.style.color = type === 'success' ? '#3fcf7f' :
+                      type === 'error'   ? '#f66' : '#fff';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
+}
+
+function showModal(modal) { modal.style.display = 'flex'; }
+function hideModal(modal) { modal.style.display = 'none'; }
+
+async function checkBanAndBlock(userUid) {
+  const snap = await get(ref(db, "users/" + userUid));
+  if (snap.exists()) {
+    const userData = snap.val();
+    if (userData.ban && userData.ban.until && Date.now() < userData.ban.until) {
+      showBannedModal(userData.ban.reason, userData.ban.until, userData.ban.byNick);
+      await signOut(auth);
+      hideAllInterface();
+      return true;
+    } else {
+      showAllInterface();
+    }
+  }
+  return false;
+}
+
+function hideAllInterface() {
+  openProfileBtn.classList.add('hidden');
+  chatBtn.classList.add('hidden');
+  mainContent.classList.add('hidden');
+  profileModal.classList.add('hidden');
+  chatPanel.classList.remove('active');
+  adminPanel.classList.add('hidden');
+  moderPanel.classList.add('hidden');
+  loginModal.style.display = 'none';
+  registerModal.style.display = 'none';
+  banUserModal.style.display = 'none';
+  shortsModal.style.display = 'none';
+}
+
+function showAllInterface() {
+  openProfileBtn.classList.remove('hidden');
+  chatBtn.classList.remove('hidden');
+  mainContent.classList.remove('hidden');
+}
+
+let banTargetUid = null;
+function openBanModal(uid) {
+  banTargetUid = uid;
+  banDurationInput.value = '';
+  banReasonSelect.value = '';
+  banCustomReason.value = '';
+  showModal(banUserModal);
+}
+closeBanModalBtn.onclick = () => {
+  banTargetUid = null;
+  hideModal(banUserModal);
+};
+banSubmitBtn.onclick = async function() {
+  if (!banTargetUid) return;
+  let minutes = parseInt(banDurationInput.value.trim());
+  let reason = banReasonSelect.value;
+  let custom = banCustomReason.value.trim();
+  if (!minutes || minutes < 1 || minutes > 10080) {
+    showToast('Введите корректное время блокировки (1-10080)', 'error');
+    banDurationInput.focus();
+    return;
+  }
+  if (!reason && !custom) {
+    showToast('Укажите причину бана', 'error');
+    return;
+  }
+  let fullReason = custom ? custom : reason;
+  let until = Date.now() + minutes * 60000;
+  let byNick = curUserData.nickname || "Админ";
+  await update(ref(db, "users/" + banTargetUid), { ban: { until, reason: fullReason, byNick } });
+  hideModal(banUserModal);
+  showToast('Пользователь забанен', 'success');
+  if (curUserData.role === "admin") renderUserList();
+  if (curUserData.role === "moder") renderModerList();
+};
+
+bannedCloseBtn.onclick = () => {
+  hideModal(bannedModal);
+  hideAllInterface();
+};
+
+function showBannedModal(reason, until, byNick) {
+  bannedReasonDiv.innerHTML = `<b>Причина:</b> ${escapeHtml(reason)}`;
+  let now = Date.now();
+  let left = until - now;
+  let mins = Math.ceil(left / 60000);
+  let untilStr = formatBanTime(until);
+  bannedTimeDiv.innerHTML = `<b>До:</b> ${untilStr} (${mins} мин.)`;
+  bannedByDiv.innerHTML = `<b>Кто забанил:</b> ${escapeHtml(byNick || "неизвестно")}`;
+  showModal(bannedModal);
+
+  document.body.style.pointerEvents = 'none';
+  bannedModal.style.pointerEvents = 'auto';
+  bannedModal.style.zIndex = '999999';
+  hideAllInterface();
+}
+
+function getNickname(email) {
+  return email ? email.split('@')[0] : '';
+}
+
+document.getElementById('registerSubmit').onclick = async function() {
+  const email = document.getElementById('registerEmail3').value.trim();
+  const password = document.getElementById('registerPassword').value.trim();
+  if (!email || !password) {
+    showToast('Заполните все поля!', 'error');
+    return;
+  }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    let role = email === ADMIN_EMAIL ? "admin" : "user";
+    await set(ref(db, "users/" + cred.user.uid), {
+      nickname: getNickname(email),
+      avatar: "",
+      email: email,
+      role: role
+    });
+    hideModal(registerModal);
+    showToast('Успешная регистрация!', 'success');
+  } catch (e) {
+    let msg = e.code === 'auth/email-already-in-use'
+      ? 'Пользователь уже существует!'
+      : e.message;
+    showToast('Ошибка регистрации: ' + msg, 'error');
+  }
+};
+
+document.getElementById('loginSubmit').onclick = async function() {
+  const email = document.getElementById('loginEmail2').value.trim();
+  const password = document.getElementById('loginPassword3').value.trim();
+  if (!email || !password) {
+    showToast('Заполните все поля!', 'error');
+    return;
+  }
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    if (await checkBanAndBlock(userCred.user.uid)) return;
+    hideModal(loginModal);
+    showToast('Вход выполнен!', 'success');
+  } catch (e) {
+    let msg = e.code === 'auth/user-not-found'
+      ? 'Пользователь не найден!'
+      : e.code === 'auth/wrong-password'
+        ? 'Неверный пароль!'
+        : e.message;
+    showToast('Ошибка входа: ' + msg, 'error');
+  }
+};
+
+logoutBtn.onclick = () => signOut(auth);
+
+let unsubscribeChat = null;
+let curUserData = { nickname: "", avatar: "", role: "user", email: "" };
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    if (await checkBanAndBlock(user.uid)) {
+      document.body.style.pointerEvents = 'none';
+      bannedModal.style.pointerEvents = 'auto';
+      bannedModal.style.zIndex = '999999';
+      openProfileBtn.style.display = 'none';
+      loginBtn.style.display = 'none';
+      registerBtn.style.display = 'none';
+      chatBtn.style.display = 'none';
+      return;
+    }
+    document.body.style.pointerEvents = '';
+    let isAdmin = user.email === ADMIN_EMAIL;
+    const snap = await get(ref(db, "users/" + user.uid));
+    let dbUser = snap.exists() ? snap.val() : {nickname: getNickname(user.email), avatar: "", role: "user", email: user.email};
+    if (isAdmin && dbUser.role !== "admin") {
+      dbUser.role = "admin";
+      await update(ref(db, "users/" + user.uid), {role:"admin"});
+    }
+    if (isAdmin && dbUser.id !== "1337") {
+      await update(ref(db, "users/" + user.uid), { id: "1337" });
+      dbUser.id = "1337";
+    }
+    curUserData = dbUser;
+    openProfileBtn.style.display = '';
+    loginBtn.style.display = 'none';
+    registerBtn.style.display = 'none';
+    chatBtn.style.display = '';
+    chatBtn.classList.remove('disabled');
+    openFriendsBtn.style.display = '';
+    chatPanel.classList.add('active');
+    mainContent.classList.remove('hidden');
+    profileEmail.textContent = user.email;
+    profileNickname.textContent = curUserData.nickname;
+    profileRoleBadge.textContent = ROLE_LABELS[curUserData.role] || "Пользователь";
+    profileRoleBadge.className = "role-label " + (ROLE_CLASS[curUserData.role]||"role-user");
+    nicknameInput.value = curUserData.nickname;
+    profileAvatar.src = curUserData.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(curUserData.nickname) + "&background=323a47&color=3fa7ff";
+    if (!curUserData.id) {
+      const newId = generateUserId();
+      await update(ref(db, "users/" + user.uid), { id: newId });
+      curUserData.id = newId;
+    }
+    profileUserId.textContent = curUserData.id || '';
+    setNicknameEditMode(false);
+    setTimeout(() => chatInput.focus(), 100);
+    loadChat();
+    // Админ-панель только для админа
+    adminPanel.style.display = 'none';
+    adminUserList.innerHTML = '';
+    if (curUserData.role === "admin") {
+      adminPanel.style.display = '';
+      renderUserList();
+    }
+    // moderPanel не используется
+  } else {
+    hideAllInterface();
+    openProfileBtn.style.display = 'none';
+    loginBtn.style.display = '';
+    registerBtn.style.display = '';
+    chatBtn.style.display = '';
+    chatBtn.classList.add('disabled');
+    openFriendsBtn.style.display = 'none';
+    chatPanel.classList.remove('active');
+    mainContent.classList.remove('hidden');
+    profileUserId.textContent = '';
+  }
+});
+
+// --- Назначение обработчиков кнопок (назначать только после получения элементов!) ---
+loginBtn.onclick = () => { showModal(loginModal); hideModal(registerModal); };
+registerBtn.onclick = () => { showModal(registerModal); hideModal(loginModal); };
+closeLoginBtn.onclick = () => hideModal(loginModal);
+closeRegisterBtn.onclick = () => hideModal(registerModal);
+closeProfileBtn.onclick = () => hideModal(profileModal);
+openProfileBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
+  if (await checkBanAndBlock(user.uid)) return;
+  showModal(profileModal);
+  // обновить данные профиля
+  profileEmail.textContent = user.email;
+  profileNickname.textContent = curUserData.nickname;
+  profileRoleBadge.textContent = ROLE_LABELS[curUserData.role] || "Пользователь";
+  profileRoleBadge.className = "role-label " + (ROLE_CLASS[curUserData.role]||"role-user");
+  nicknameInput.value = curUserData.nickname;
+  profileAvatar.src = curUserData.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(curUserData.nickname) + "&background=323a47&color=3fa7ff";
+  profileUserId.textContent = curUserData.id || '';
+};
+openFriendsBtn.onclick = () => {
+  friendIdInput.value = "";
+  friendSearchResult.innerHTML = "";
+  updateFriendsUI();
+  friendsModal.style.display = 'flex';
+};
+closeFriendsBtn.onclick = () => {
+  friendsModal.style.display = 'none';
+};
+chatBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    showToast('Войдите для доступа к чату!', 'error');
+    return;
+  }
+  if (await checkBanAndBlock(user.uid)) return;
+  chatPanel.style.display = 'flex';
+  chatPanel.classList.add('active');
+  setTimeout(() => {
+    chatInput.focus();
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 100);
+  loadChat();
+};
+openNewsBtn.onclick = () => {
+  newsModal.style.display = 'flex';
+};
+closeNewsBtn.onclick = () => {
+  newsModal.style.display = 'none';
+};
+openShortsBtn.onclick = async () => {
+  shortsModal.style.display = 'flex';
+  renderShorts();
+};
+closeShortsBtn.onclick = () => { shortsModal.style.display = 'none'; };
+shortsPublishBtn.onclick = () => { shortsPublishModal.style.display = 'flex'; };
+closeShortsPublish.onclick = () => { shortsPublishModal.style.display = 'none'; };
+
+// --- Публикация нового шортса ---
+shortsSubmitBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) { showToast('Войдите для публикации!', 'error'); return; }
+  const file = shortsVideoInput.files[0];
+  const desc = shortsDescInput.value.trim();
+  if (!file || !desc) {
+    showToast('Выберите видео и введите описание', 'error');
+    return;
+  }
+  shortsSubmitBtn.disabled = true;
+  shortsSubmitBtn.textContent = "Загрузка...";
+  try {
+    // Загружаем видео в Firebase Storage
+    const videoRef = sRef(storage, `shorts/${user.uid}${Date.now()}.mp4`);
+    await uploadBytes(videoRef, file);
+    const videoUrl = await getDownloadURL(videoRef);
+    // Получаем данные пользователя
+    const snap = await get(ref(db, "users/" + user.uid));
+    const userData = snap.exists() ? snap.val() : {};
+    // Сохраняем шортс в базу
+    await push(ref(db, "shorts"), {
+      video: videoUrl,
+      desc: desc,
+      uid: user.uid,
+      nickname: userData.nickname || getNickname(user.email),
+      avatar: userData.avatar || "",
+      timestamp: Date.now()
+    });
+    showToast('Шортс опубликован!', 'success');
+    shortsPublishModal.style.display = 'none';
+    shortsVideoInput.value = "";
+    shortsDescInput.value = "";
+    renderShorts();
+  } catch (e) {
+    showToast('Ошибка публикации: ' + e.message, 'error');
+  }
+  shortsSubmitBtn.disabled = false;
+  shortsSubmitBtn.textContent = "Опубликовать";
+};
+
+// --- Рендер шортсов (youtube shorts) ---
+import { onValue as onValueShorts } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+function renderShorts() {
+  shortsScroll.innerHTML = '<div style="color:#aaa;text-align:center;margin-top:30px;">Загрузка...</div>';
+  const shortsRef = ref(db, "shorts");
+  onValueShorts(shortsRef, snap => {
+    if (!snap.exists()) {
+      shortsScroll.innerHTML = '<div style="color:#888;text-align:center;margin-top:30px;">Нет шортсов</div>';
+      return;
+    }
+    // Сортируем по времени (новые сверху)
+    const shortsArr = [];
+    snap.forEach(child => shortsArr.push({key: child.key, ...child.val()}));
+    shortsArr.sort((a, b) => b.timestamp - a.timestamp);
+    shortsScroll.innerHTML = "";
+    shortsArr.forEach(s => {
+      // Определяем, это youtube-ссылка или обычное видео
+      let isYoutube = false;
+      let videoHtml = "";
+      if (s.video && typeof s.video === "string" && (s.video.includes("youtube.com") || s.video.includes("youtu.be"))) {
+        isYoutube = true;
+        // Получаем id видео
+        let ytId = "";
+        const ytMatch = s.video.match(/(?:youtube.com\/.*v=|youtu\.be\/)([A-Za-z0-9_\-]+)/);
+        if (ytMatch && ytMatch[1]) ytId = ytMatch[1];
+        if (ytId) {
+          videoHtml = `<iframe class="shorts-video" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+        } else {
+          videoHtml = `<div style="color:#e74c3c;padding:20px;">Ошибка ссылки на YouTube</div>`;
+        }
+      } else if (s.video) {
+        videoHtml = `<video src="${s.video}" controls loop class="shorts-video"></video>`;
+      } else {
+        videoHtml = `<div style="color:#e74c3c;padding:20px;">Нет видео</div>`;
+      }
+      const avatar = s.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(s.nickname || "???") + "&background=323a47&color=3fa7ff";
+      shortsScroll.innerHTML += `
+        <div class="shorts-video-block">
+          ${videoHtml}
+          <div class="shorts-info">
+            <img src="${avatar}" class="shorts-avatar" />
+            <div>
+              <div class="shorts-nick">@${escapeHtml(s.nickname||"??")}</div>
+              <div class="shorts-desc">${escapeHtml(s.desc||"")}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  });
+}
+
+// --- Закрытие модалки по клику вне окна ---
+window.addEventListener('click', function(e) {
+  if (e.target === shortsModal) shortsModal.style.display = 'none';
+  if (e.target === shortsPublishModal) shortsPublishModal.style.display = 'none';
+});
+
+// --- Делаем кнопку активной после входа ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    openShortsBtn.classList.remove('disabled');
+    openShortsBtn.disabled = false;
+  } else {
+    openShortsBtn.classList.add('disabled');
+    openShortsBtn.disabled = true;
+  }
+});
+
+// --- ЧИНИМ ЗАКРЫТИЕ ЧАТА ---
+const closeChatBtn = document.createElement('button');
+closeChatBtn.textContent = '×';
+closeChatBtn.className = 'close-btn';
+closeChatBtn.title = 'Закрыть';
+closeChatBtn.style.position = 'absolute';
+closeChatBtn.style.right = '18px';
+closeChatBtn.style.top = '12px';
+closeChatBtn.style.zIndex = '10';
+const chatModalWindow = document.querySelector('.chat-modal-window');
+if (chatModalWindow && !document.getElementById('closeChatBtn1337')) {
+  closeChatBtn.id = 'closeChatBtn1337';
+  chatModalWindow.appendChild(closeChatBtn);
+  closeChatBtn.onclick = () => {
+    chatPanel.style.display = 'none';
+    chatPanel.classList.remove('active');
+  };
+}
+
+// --- ЧИНИМ ОТОБРАЖЕНИЕ АДМИН-ПАНЕЛИ ТОЛЬКО ДЛЯ АДМИНА ---
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    adminPanel.style.display = 'none';
+    adminUserList.innerHTML = '';
+    if (curUserData.role === "admin") {
+      adminPanel.style.display = '';
+      renderUserList();
+    } else {
+      adminPanel.style.display = 'none';
+    }
+  }
+});
+      const parent = sel.closest('.admin-user-item');
+      const uid = parent.dataset.uid;
+      const val = sel.value;
+      await update(ref(db, "users/" + uid), {role: val});
+      showToast("Роль обновлена!", "success");
+      renderUserList();
+  adminUserList.querySelectorAll('.admin-ban-btn').forEach(btn => {
+    btn.onclick = () => openBanModal(btn.dataset.uid);
+  });
+  adminUserList.querySelectorAll('.admin-unban-btn').forEach(btn => {
+    btn.onclick = async () => {
+      await update(ref(db, "users/" + btn.dataset.uid), {ban: null});
+      showToast("Пользователь разбанен", "success");
+      renderUserList();
+    };
+  });
+  adminUserList.querySelectorAll('.admin-del-btn').forEach(btn => {
+    btn.onclick = async () => {
+      if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
+        await remove(ref(db, "users/" + btn.dataset.uid));
+        showToast("Пользователь удалён", "success");
+        renderUserList();
+      }
+    };
+  });
+
+function formatBanTime(until) {
+  let d = new Date(until);
+  return d.toLocaleString("ru-RU", {hour: "2-digit", minute: "2-digit", day:"2-digit", month:"2-digit"});
+}
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function getRoleBadge(role) {
+  return `<span class="${CHAT_ROLE_CLASS[role]||'chat-role-badge chat-role-user'}">${ROLE_LABELS[role]||'Пользователь'}</span>`;
+}
+let editMsgId = null;
+// --- ДОБАВИТЬ: Генерация ID приватного чата ---
+function getPrivateChatId(uid1, uid2) {
+  return [uid1, uid2].sort().join("_");
+}
+
+// --- ДОБАВИТЬ: Список чатов с друзьями в левой панели ---
+async function renderChatList() {
+  const user = auth.currentUser;
+  if (!user) return;
+  await updateUsersCache();
+  const mySnap = await get(ref(db, "users/" + user.uid));
+  const myData = mySnap.exists() ? mySnap.val() : {};
+  const friends = myData.friends || {};
+  const chatListDiv = document.getElementById('chatList');
+  // Оставляем только заголовок и глобальный чат
+  chatListDiv.innerHTML = `
+    <div style="padding:18px 18px 8px 18px;font-weight:bold;color:#aaa;font-size:1.07em;">Чаты</div>
+    <div id="globalChatBtn" class="chat-list-item${currentChatType === "global" ? " selected" : ""}" style="padding:10px 18px;cursor:pointer;font-weight:bold;color:#3fa7ff;border-radius:6px;margin:0 8px 8px 8px;background:#23272e;display:flex;align-items:center;">
+      🌐 Глобальный чат
+    </div>
+  `;
+  // Добавляем приватные чаты с друзьями
+  Object.keys(friends).forEach(friendUid => {
+    const friend = usersCache[friendUid];
+    if (!friend) return;
+    const selected = (currentChatType === "private" && currentChatUserUid === friendUid) ? "selected" : "";
+    chatListDiv.innerHTML += `
+      <div class="chat-list-item ${selected}" data-uid="${friendUid}" style="padding:10px 18px;cursor:pointer;font-weight:bold;color:#3fcf7f;border-radius:6px;margin:0 8px 8px 8px;background:#23272e;display:flex;align-items:center;">
+        👤 ${escapeHtml(friend.nickname)} <span style="color:#aaa;font-size:0.95em;margin-left:4px;">[${friend.id||""}]</span>
+      </div>
+    `;
+  });
+  // Навешиваем обработчики
+  document.getElementById('globalChatBtn').onclick = () => {
+    currentChatType = "global";
+    currentChatUserUid = null;
+    renderChatList();
+    loadChat();
+  };
+  chatListDiv.querySelectorAll('.chat-list-item[data-uid]').forEach(div => {
+    div.onclick = () => {
+      currentChatType = "private";
+      currentChatUserUid = div.dataset.uid;
+      renderChatList();
+      loadChat();
+    };
+  });
+}
+
+// --- ФУНКЦИЯ ОТПРАВКИ СООБЩЕНИЙ В ЧАТ (глобальный и приватный) ---
+async function sendChatMessage() {
+  const message = chatInput.value.trim();
+  const user = auth.currentUser;
+  if (!message) return;
+  if (!user) {
+    showToast('Войдите в систему для отправки сообщений!', 'error');
+    return;
+  }
+  if (await checkBanAndBlock(user.uid)) return;
+  const snap = await get(ref(db, "users/" + user.uid));
+  const userData = snap.exists() ? snap.val() : {nickname: getNickname(user.email), avatar: "", role: "user"};
+  if (currentChatType === "global") {
+    push(ref(db, 'chatMessages'), {
+      email: user.email,
+      nickname: userData.nickname || getNickname(user.email),
+      avatar: userData.avatar || "",
+      role: userData.role || "user",
+      message: message,
+      timestamp: Date.now()
+    }).then(() => {
+      chatInput.value = '';
+      chatInput.focus();
+    }).catch((err) => {
+      showToast('Ошибка отправки сообщения: ' + err.message, 'error');
+    });
+  } else if (currentChatType === "private" && currentChatUserUid) {
+    const chatId = getPrivateChatId(user.uid, currentChatUserUid);
+    push(ref(db, 'privateChats/' + chatId), {
+      email: user.email,
+      nickname: userData.nickname || getNickname(user.email),
+      avatar: userData.avatar || "",
+      role: userData.role || "user",
+      message: message,
+      timestamp: Date.now()
+    }).then(() => {
+      chatInput.value = '';
+      chatInput.focus();
+    }).catch((err) => {
+      showToast('Ошибка отправки сообщения: ' + err.message, 'error');
+    });
+  }
+}
+
+// --- Генерация и отображение ID пользователя ---
+function generateUserId() {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+// --- Система друзей: структура в базе ---
+// users/{uid}/friends: { [friendUid]: true }
+// users/{uid}/friendRequests: { [fromUid]: true }
+// users/{uid}/sentRequests: { [toUid]: true }
+
+// --- onAuthStateChanged: обновляем отображение друзей и заявок ---
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    openFriendsBtn.style.display = '';
+    updateFriendsUI();
+    listenFriendRequests();
+  } else {
+    openFriendsBtn.style.display = 'none';
+    friendsNotif.style.display = 'none';
+  }
+});
+
+// --- Открытие/закрытие модального окна "Друзья" ---
+openFriendsBtn.onclick = () => {
+  friendIdInput.value = "";
+  friendSearchResult.innerHTML = "";
+  updateFriendsUI();
+  friendsModal.style.display = 'flex';
+};
+closeFriendsBtn.onclick = () => {
+  friendsModal.style.display = 'none';
+};
+
+
+// --- Поиск друга по ID и отправка заявки ---
+findFriendBtn.onclick = async () => {
+  const id = friendIdInput.value.trim();
+  friendSearchResult.innerHTML = '';
+  if (!/^\d{4}$/.test(id)) {
+    friendSearchResult.innerHTML = '<span style="color:#e74c3c;">Введите корректный ID (4 цифры)</span>';
+    return;
+  }
+  const user = auth.currentUser;
+  if (!user) return;
+  const snap = await get(ref(db, "users"));
+  if (!snap.exists()) {
+    friendSearchResult.innerHTML = '<span style="color:#e74c3c;">Пользователь не найден</span>';
+    return;
+  }
+  let found = null, foundUid = null;
+  Object.entries(snap.val()).forEach(([uid, data]) => {
+    if (data.id === id) { found = data; foundUid = uid; }
+  });
+  if (!found) {
+    friendSearchResult.innerHTML = '<span style="color:#e74c'
+    if (data.id === id) { found = data; foundUid = uid; }
+  };
+  if (!found) {
+    friendSearchResult.innerHTML = '<span style="color:#e74c3c;">Пользователь не найден</span>';
+    return;
+  }
+  if (foundUid === user.uid) {
+    friendSearchResult.innerHTML = '<span style="color:#e74c3c;">Нельзя добавить себя</span>';
+    return;
+  }
+  // Проверяем, не друг ли уже
+  const mySnap = await get(ref(db, "users/" + user.uid));
+  const myData = mySnap.exists() ? mySnap.val() : {};
+  if (myData.friends && myData.friends[foundUid]) {
+    friendSearchResult.innerHTML = '<span style="color:#3fcf7f;">Этот пользователь уже у вас в друзьях</span>';
+    return;
+  }
+  // Проверяем, не отправлена ли уже заявка
+  if (myData.sentRequests && myData.sentRequests[foundUid]) {
+    friendSearchResult.innerHTML = '<span style="color:#aaa;">Заявка уже отправлена</span>';
+    return;
+  }
+  // Проверяем, не поступила ли от него заявка
+  if (myData.friendRequests && myData.friendRequests[foundUid]) {
+    friendSearchResult.innerHTML = `<span style="color:#3fa7ff;">Этот пользователь уже отправил вам заявку. <button id="acceptReqBtn" style="margin-left:8px;">Принять</button></span>`;
+    document.getElementById('acceptReqBtn').onclick = async () => {
+      await acceptFriendRequest(foundUid);
+      updateFriendsUI();
+    };
+    return;
+  }
+  // Кнопка отправки заявки
+  friendSearchResult.innerHTML = `<span style="color:#fff;">Найден: ${escapeHtml(found.nickname)} (${escapeHtml(found.email)})</span>
+    <button id="sendFriendReqBtn" style="margin-left:10px;">Отправить заявку</button>`;
+  document.getElementById('sendFriendReqBtn').onclick = async () => {
+    await sendFriendRequest(foundUid);
+    friendSearchResult.innerHTML = '<span style="color:#3fa7ff;">Заявка отправлена!</span>';
+    updateFriendsUI();
+  };
+};
+
+// --- Отправка заявки в друзья ---
+async function sendFriendRequest(toUid) {
+  const user = auth.currentUser;
+  if (!user) return;
+  // Добавляем в friendRequests к получателю и в sentRequests к себе
+  await update(ref(db, `users/${toUid}/friendRequests`), { [user.uid]: true });
+  await update(ref(db, `users/${user.uid}/sentRequests`), { [toUid]: true });
+}
+
+// --- Принять заявку ---
+async function acceptFriendRequest(fromUid) {
+  const user = auth.currentUser;
+  if (!user) return;
+  // Добавляем друг друга в friends
+  await update(ref(db, `users/${user.uid}/friends`), { [fromUid]: true });
+  await update(ref(db, `users/${fromUid}/friends`), { [user.uid]: true });
+  // Удаляем заявки
+  await update(ref(db, `users/${user.uid}/friendRequests`), { [fromUid]: null });
+  await update(ref(db, `users/${fromUid}/sentRequests`), { [user.uid]: null });
+}
+
+// --- Отклонить заявку ---
+async function declineFriendRequest(fromUid) {
+  const user = auth.currentUser;
+  if (!user) return;
+  await update(ref(db, `users/${user.uid}/friendRequests`), { [fromUid]: null });
+  await update(ref(db, `users/${fromUid}/sentRequests`), { [user.uid]: null });
+}
+
+// --- Удалить друга ---
+async function removeFriend(friendUid) {
+  const user = auth.currentUser;
+  if (!user) return;
+  await update(ref(db, `users/${user.uid}/friends`), { [friendUid]: null });
+  await update(ref(db, `users/${friendUid}/friends`), { [user.uid]: null });
+}
+
+// --- UI обновление списка друзей и заявок ---
+async function updateFriendsUI() {
+  const user = auth.currentUser;
+  if (!user) return;
+  // Получаем всех пользователей
+  const usersSnap = await get(ref(db, "users"));
+  const users = usersSnap.exists() ? usersSnap.val() : {};
+  // Получаем свои данные
+  const mySnap = await get(ref(db, "users/" + user.uid));
+  const myData = mySnap.exists() ? mySnap.val() : {};
+  // --- Заявки в друзья ---
+  let reqs = myData.friendRequests || {};
+  let reqHtml = "";
+  let notif = false;
+  Object.keys(reqs).forEach(uid => {
+    if (!users[uid]) return;
+    notif = true;
+    reqHtml += `<div style="margin-bottom:7px;">
+      <span style="color:#fff;">${escapeHtml(users[uid].nickname)} (${escapeHtml(users[uid].email)})</span>
+      <button class="acceptReqBtn" data-uid="${uid}" style="margin-left:8px;">Принять</button>
+      <button class="declineReqBtn" data-uid="${uid}" style="margin-left:4px;">Отклонить</button>
+    </div>`;
+  });
+  friendRequestsList.innerHTML = reqHtml || '<span style="color:#888;">Нет заявок</span>';
+  friendsNotif.style.display = notif ? '' : 'none';
+  // --- Список друзей ---
+  let friends = myData.friends || {};
+  let friendsHtml = "";
+  Object.keys(friends).forEach(uid => {
+    if (!users[uid]) return;
+    friendsHtml += `<div style="margin-bottom:7px;">
+      <span style="color:#3fa7ff;">${escapeHtml(users[uid].nickname)} (${escapeHtml(users[uid].email)})</span>
+      <button class="removeFriendBtn" data-uid="${uid}" style="margin-left:8px;">Удалить</button>
+      <button class="chatFriendBtn" data-uid="${uid}" style="margin-left:4px;">Чат</button>
+    </div>`;
+  });
+  friendsList.innerHTML = friendsHtml || '<span style="color:#888;">Нет друзей</span>';
+  // --- Навешиваем обработчики ---
+  friendRequestsList.querySelectorAll('.acceptReqBtn').forEach(btn => {
+    btn.onclick = async () => { await acceptFriendRequest(btn.dataset.uid); updateFriendsUI(); };
+  });
+  friendRequestsList.querySelectorAll('.declineReqBtn').forEach(btn => {
+    btn.onclick = async () => { await declineFriendRequest(btn.dataset.uid); updateFriendsUI(); };
+  });
+  friendsList.querySelectorAll('.removeFriendBtn').forEach(btn => {
+    btn.onclick = async () => { await removeFriend(btn.dataset.uid); updateFriendsUI(); };
+  });
+  friendsList.querySelectorAll('.chatFriendBtn').forEach(btn => {
+    btn.onclick = () => {
+      openPrivateChat(btn.dataset.uid);
+      renderChatList();
+    };
+  });
+  // --- обновить список чатов ---
+  renderChatList();
+}
+
+// --- Уведомление о новых заявках (реалтайм) ---
+function listenFriendRequests() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const reqRef = ref(db, `users/${user.uid}/friendRequests`);
+  onValue(reqRef, snap => {
+    const reqs = snap.exists() ? snap.val() : {};
+    let hasReq = Object.keys(reqs).length > 0;
+    friendsNotif.style.display = hasReq ? '' : 'none';
+  });
+}
+
+// --- Открытие приватного чата с другом ---
+let currentChatType = "global";
+let currentChatUserUid = null;
+function openPrivateChat(friendUid) {
+  currentChatType = "private";
+  currentChatUserUid = friendUid;
+  document.querySelectorAll('.chat-list-item').forEach(i => i.classList.remove('selected'));
+  chatPanel.style.display = 'flex';
+  chatPanel.classList.add('active');
+  loadChat();
+  setTimeout(() => {
+    chatInput.focus();
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 100);
+}
+
+// --- Функция отображения сообщений в чате ---
+// Используем DocumentFragment для ускорения массовой вставки сообщений
+function addMessageToChat(nick, avatar, role, text, timestamp, msgId, email, edited, isPrivate = false, userId = "", isFriend = false, frag = null) {
+  const div = document.createElement('div');
+  let idOrFriendHtml = "";
+  if (!isPrivate) {
+    if (isFriend) {
+      idOrFriendHtml = `<span title="У вас в друзьях" style="color:#3fcf7f;font-size:1.15em;margin-left:4px;vertical-align:middle;">&#10084;&#65039;</span>`;
+    } else if (userId) {
+      idOrFriendHtml = `<span style="color:#aaa;font-size:0.95em;margin-left:4px;">[${userId}]</span>`;
+    }
+  }
+  div.innerHTML = `
+    <img src="${avatar || ''}" class="chat-avatar" alt="avatar">
+    <span class="nickname">${escapeHtml(nick)}</span>
+    ${idOrFriendHtml}
+    ${getRoleBadge(role)}
+    <span class="time">${new Date(timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</span>
+    <span class="text">${escapeHtml(text)}</span>
+    ${edited ? '<span class="msg-edited">(изменено)</span>' : ''}
+  `;
+  if (frag) {
+    frag.appendChild(div);
+  } else {
+    chatMessages.appendChild(div);
+  }
+}
+
+// --- Модификация loadChat: используем DocumentFragment для ускорения отрисовки чата ---
+function loadChat() {
+  if (unsubscribeChat) { unsubscribeChat(); }
+  chatMessages.innerHTML = '';
+  const user = auth.currentUser;
+  if (!user) return;
+  if (currentChatType === "global") {
+    const messagesRef = ref(db, 'chatMessages');
+    unsubscribeChat = onValue(messagesRef, (snapshot) => {
+      const frag = document.createDocumentFragment();
+      let myFriends = {};
+      if (usersCache && usersCache[user.uid] && usersCache[user.uid].friends) {
+        myFriends = usersCache[user.uid].friends;
+      }
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        let nick = data.nickname;
+        let avatar = data.avatar;
+        let role = data.role || "user";
+        let edited = !!data.edited;
+        let uid = null;
+        for (const [k, v] of Object.entries(usersCache)) {
+          if (v.email === data.email) { uid = k; break; }
+        }
+        let userId = uid ? getUserIdByUid(uid, usersCache) : "";
+        let isFriend = uid && myFriends && myFriends[uid];
+        if (!nick && data.email) nick = getNickname(data.email);
+        if (!avatar) avatar = "https://ui-avatars.com/api/?name=" + encodeURIComponent(nick || "???") + "&background=323a47&color=3fa7ff";
+        addMessageToChat(nick, avatar, role, data.message, data.timestamp, childSnapshot.key, data.email, edited, false, userId, !!isFriend, frag);
+      });
+      chatMessages.innerHTML = '';
+      chatMessages.appendChild(frag);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  } else if (currentChatType === "private" && currentChatUserUid) {
+    const chatId = getPrivateChatId(user.uid, currentChatUserUid);
+    const messagesRef = ref(db, 'privateChats/' + chatId);
+    unsubscribeChat = onValue(messagesRef, (snapshot) => {
+      const frag = document.createDocumentFragment();
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        let nick = data.nickname;
+        let avatar = data.avatar;
+        let role = data.role || "user";
+        let edited = !!data.edited;
+        if (!nick && data.email) nick = getNickname(data.email);
+        if (!avatar) avatar = "https://ui-avatars.com/api/?name=" + encodeURIComponent(nick || "???") + "&background=323a47&color=3fa7ff";
+        addMessageToChat(nick, avatar, role, data.message, data.timestamp, childSnapshot.key, data.email, edited, true, "", false, frag);
+      });
+      chatMessages.innerHTML = '';
+      chatMessages.appendChild(frag);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+}
+
+// --- ДОБАВИТЬ: Получение ID пользователя по UID ---
+function getUserIdByUid(uid, usersCache) {
+  if (!usersCache || !usersCache[uid]) return "";
+  return usersCache[uid].id || "";
+}
+
+// --- ДОБАВИТЬ: Кэш пользователей для быстрого доступа к ID ---
+let usersCache = {};
+async function updateUsersCache() {
+  const snap = await get(ref(db, "users"));
+  usersCache = snap.exists() ? snap.val() : {};
+}
+updateUsersCache();
+setInterval(updateUsersCache, 10000); // обновлять кэш раз в 10 сек
+
+// --- ДОБАВИТЬ: обновлять список чатов при изменении друзей ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    renderChatList();
+    // ...existing code...
+  }
+});
+
+// --- УДАЛИТЬ ДУБЛИКАТ ФУНКЦИИ updateFriendsUI ---
+// Найдите в файле все объявления async function updateFriendsUI() { ... }
+// Оставьте только одно (полное) объявление этой функции, остальные полностью удалите.
+
+// --- ДОБАВИТЬ: отправку сообщений по кнопке и по Enter для чата ---
+chatSend.onclick = sendChatMessage;
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
+// --- Liquid Glass Auth Modal Logic ---
+function showAuthTab(tab) {
+  const tabLogin = document.getElementById('tabLogin');
+  const tabRegister = document.getElementById('tabRegister');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  if (tab === 'login') {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    loginForm.style.display = 'flex';
+    registerForm.style.display = 'none';
+  } else {
+    tabLogin.classList.remove('active');
+    tabRegister.classList.add('active');
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'flex';
+  }
+}
+const closeAuthBtn = document.getElementById('closeAuth');
+const authModal = document.getElementById('authModal');
+const showLoginPass = document.getElementById('showLoginPass');
+const showRegisterPass = document.getElementById('showRegisterPass');
+
+if (loginBtn) loginBtn.onclick = () => { showAuthTab('login'); if (authModal) authModal.style.display = 'flex'; };
+if (registerBtn) registerBtn.onclick = () => { showAuthTab('register'); if (authModal) authModal.style.display = 'flex'; };
+if (tabLogin) tabLogin.onclick = () => showAuthTab('login');
+if (tabRegister) tabRegister.onclick = () => showAuthTab('register');
+if (closeAuthBtn) closeAuthBtn.onclick = () => { if (authModal) authModal.style.display = 'none'; };
+
+if (showLoginPass) showLoginPass.onclick = () => {
+  const inp = document.getElementById('loginPassword4');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+};
+if (showRegisterPass) showRegisterPass.onclick = () => {
+  const inp = document.getElementById('registerPassword2');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+};
+</script>
+</body>
+</html>
