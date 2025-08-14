@@ -944,31 +944,35 @@ document.addEventListener('DOMContentLoaded', () => {
 async function sendMessage(){
   const text = chatInput.value.trim();
   if(!text || !curUser || !currentPeerUid) return;
+
   const my = usersCache[curUser.uid] || curUserData || {};
-  const msgRef = await push(ref(db, `privateChats/${currentChatId}`), {
+  const timestamp = Date.now();
+  chatInput.value = '';
+  chatInput.focus();
+
+  // Отправляем в Firebase
+  await push(ref(db, `privateChats/${currentChatId}`), {
     uid: curUser.uid,
     email: curUser.email,
     nickname: my.nickname || (curUser.email||'').split('@')[0],
     avatar: my.avatar || '',
     role: my.role || 'user',
     message: text,
-    timestamp: Date.now()
+    timestamp
   });
-  chatInput.value='';
+
   const peer = usersCache[currentPeerUid] || {};
   const prev = preview(text);
   await Promise.all([
     update(ref(db, `userChats/${curUser.uid}/${currentPeerUid}`), {
-      lastTimestamp: Date.now(), lastMessage: prev,
+      lastTimestamp: timestamp, lastMessage: prev,
       peerNickname: peer.nickname || '', peerAvatar: peer.avatar || '', peerRole: peer.role || 'user'
     }),
     update(ref(db, `userChats/${currentPeerUid}/${curUser.uid}`), {
-      lastTimestamp: Date.now(), lastMessage: prev,
+      lastTimestamp: timestamp, lastMessage: prev,
       peerNickname: my.nickname || '', peerAvatar: my.avatar || '', peerRole: my.role || 'user'
     })
   ]);
-  // Обновляем usersCache после отправки сообщения
-  await refreshUsersCache();
 }
 </script>
 </body>
