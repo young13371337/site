@@ -381,7 +381,7 @@
     <button id="closeChatBtn" class="close-btn" title="Закрыть">×</button>
     <aside class="chat-left">
       <div class="chat-left-header">Чаты</div>
-      <button id="addChatBtn" class="chat-add-btn">+ Добавить чат</button>
+      <button id="addChatBtn" class="chat-add-btn">+</button>
       <div id="chatList" class="chat-list"></div>
     </aside>
     <section class="chat-main">
@@ -707,28 +707,70 @@ function renderMessage(m){
   const container = document.createElement('div');
   container.className = 'msg-row';
   const u = Object.values(usersCache).find(x=>x.email===m.email) || {};
-  const hashtag = u.hashtag ? `<span style="color:#3fa7ff;font-weight:700;margin-right:4px">${escapeHtml(u.hashtag)}</span>` : '';
+  const hashtag = u.hashtag ? `<span style=\"color:#3fa7ff;font-weight:700;margin-right:4px\">${escapeHtml(u.hashtag)}</span>` : '';
   const nickname = m.nickname || u.nickname || '???';
   const avatar = m.avatar || u.avatar || avatarOf(nickname);
   const role = m.role || u.role || 'user';
-  const editedMark = '';
-  const textHtml = `<span class="msg-text">${escapeHtml(m.message||'')}</span>`;
+  const editedMark = m.edited ? `<span class=\"msg-edited\">(изменено)</span>` : '';
+  const textHtml = `<span class=\"msg-text\">${escapeHtml(m.message||'')}</span>`;
+  let editBtn = '';
+  if(mine) editBtn = `<button class=\"icon-btn\" title=\"Редактировать сообщение\" data-key=\"${m.key}\">✏️</button>`;
   container.innerHTML = `
-    <img class="msg-avatar" src="${avatar}" alt="">
-    <div style="flex:1;min-width:0">
-      <div class="msg-head">
-        ${hashtag}<span class="msg-nick">${escapeHtml(nickname)}</span>
+    <img class=\"msg-avatar\" src=\"${avatar}\" alt=\"\">
+    <div style=\"flex:1;min-width:0\">
+      <div class=\"msg-head\">
+        ${hashtag}<span class=\"msg-nick\">${escapeHtml(nickname)}</span>
         ${getRoleBadge(role)}
-        <span class="msg-time">${fmtTime(m.timestamp||Date.now())}</span>
+        <span class=\"msg-time\">${fmtTime(m.timestamp||Date.now())}</span>
         ${editedMark}
+        ${editBtn}
       </div>
-      <div class="msg-body" data-key="${m.key}">
+      <div class=\"msg-body\" data-key=\"${m.key}\">
         ${textHtml}
       </div>
     </div>
   `;
   chatMessages.appendChild(container);
+  // обработчик редактирования
+  if(mine) {
+    container.querySelector('.icon-btn').onclick = () => startEditMessage(m);
+  }
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Модалка/инпут для редактирования сообщения
+let editMsgModal = null;
+function startEditMessage(m) {
+  if(editMsgModal) editMsgModal.remove();
+  editMsgModal = document.createElement('div');
+  editMsgModal.style.position = 'fixed';
+  editMsgModal.style.left = '0';
+  editMsgModal.style.top = '0';
+  editMsgModal.style.width = '100vw';
+  editMsgModal.style.height = '100vh';
+  editMsgModal.style.background = 'rgba(0,0,0,0.5)';
+  editMsgModal.style.display = 'flex';
+  editMsgModal.style.alignItems = 'center';
+  editMsgModal.style.justifyContent = 'center';
+  editMsgModal.style.zIndex = '5000';
+  editMsgModal.innerHTML = `<div style='background:#23272e;padding:32px 28px;border-radius:14px;min-width:320px;max-width:90vw;'>
+    <h3 style='margin-top:0'>Редактировать сообщение</h3>
+    <textarea id='editMsgInput' style='width:100%;height:80px;border-radius:8px;padding:10px;font-size:1.1em;'>${escapeHtml(m.message||'')}</textarea>
+    <div style='margin-top:18px;text-align:right;'>
+      <button id='editMsgSave' style='padding:10px 22px;border-radius:8px;background:#3fa7ff;color:#fff;font-weight:700;border:none;cursor:pointer;'>Сохранить</button>
+      <button id='editMsgCancel' style='padding:10px 22px;border-radius:8px;background:#555;color:#fff;font-weight:700;border:none;cursor:pointer;margin-left:10px;'>Отмена</button>
+    </div>
+  </div>`;
+  document.body.appendChild(editMsgModal);
+  document.getElementById('editMsgInput').focus();
+  document.getElementById('editMsgSave').onclick = async () => {
+    const newText = document.getElementById('editMsgInput').value.trim();
+    if(!newText) return showToast('Сообщение не может быть пустым','error');
+    await update(ref(db, `privateChats/${currentChatId}/${m.key}`), { message: newText, edited: true });
+    editMsgModal.remove();
+  };
+  document.getElementById('editMsgCancel').onclick = () => editMsgModal.remove();
+  editMsgModal.onclick = e => { if(e.target === editMsgModal) editMsgModal.remove(); };
 }
 
 // Аккуратная шапка чата
