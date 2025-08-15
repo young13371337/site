@@ -78,8 +78,8 @@
     .modal-content-gray{
       background:var(--panel2);border-radius:14px;padding:28px 24px;min-width:340px;max-width:500px;color:var(--ink);text-align:center;position:relative
     }
-    .close-btn{position:absolute;right:12px;top:10px;font-size:1.6rem;color:#aaa;background:none;border:none;cursor:pointer}
-    .close-btn:hover{color:#fff}
+    .close-btn{position:absolute;right:12px;top:10px;font-size:1.6rem;color:#aaa;background:none;border:none;cursor:pointer;width:38px;height:38px;display:flex;align-items:center;justify-content:center;transition:background .18s;z-index:10;line-height:1;}
+    .close-btn:hover{color:#fff;background:rgba(255,255,255,0.08);}
     .input-gray{
       width:100%;margin-bottom:12px;padding:12px;border-radius:9px;border:1.5px solid #444;background:#2e323a;color:#fff;outline:none
     }
@@ -215,94 +215,114 @@
   <!-- Liquid Glass Auth Modal Styles -->
   <style>
     .container {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%);
-      border-radius: 20px;
-      padding: 40px;
+      background: rgba(32, 36, 48, 0.82);
+      backdrop-filter: blur(18px) saturate(120%);
+      -webkit-backdrop-filter: blur(18px) saturate(120%);
+      border-radius: 18px;
+      padding: 44px 36px 36px 36px;
       width: 500px;
-      height: 350px;
+      min-height: 340px;
       box-sizing: border-box;
-      box-shadow: 0 0 25px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15);
-      color: white;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13), 0 0 0 2px #23272e55;
+      color: #e6eaf3;
       position:relative;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      border: 1.5px solid #23272e99;
+      overflow: hidden;
     }
     .tabs {
       display: flex;
       position: relative;
       margin-bottom: 30px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
       overflow: hidden;
+      box-shadow: 0 2px 8px rgba(63,167,255,0.08);
     }
     .tab {
       flex: 1;
       text-align: center;
       padding: 15px 0;
       cursor: pointer;
-      font-size: 1.2em;
-      color: rgba(255,255,255,0.7);
-      transition: color 0.3s ease;
+      font-size: 1.13em;
+      color: #b3b9c9;
+      transition: color 0.3s, background 0.3s;
       position: relative;
       z-index: 1;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
-    .tab.active { color: #fff; }
+    .tab.active {
+      color: #e6eaf3;
+      background: rgba(44,52,70,0.32);
+      box-shadow: 0 2px 8px #23272e33;
+    }
     .indicator {
       position: absolute;
       height: 100%;
       width: 50%;
       top: 0;
       left: 0;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border-radius: 12px;
-      box-shadow: inset 0 0 25px rgba(255,255,255,0.3), inset 0 0 10px rgba(255,255,255,0.5);
-      transition: left 0.4s ease;
+      background: linear-gradient(90deg, #23272e 0%, #3fa7ff22 100%);
+      opacity: 0.13;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px #23272e22;
+      transition: left 0.4s cubic-bezier(.4,2,.6,1);
     }
     .form {
       display: none;
       flex-direction: column;
       gap: 20px;
       opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
+      transform: translateY(16px) scale(0.98);
+      pointer-events: none;
+      filter: blur(4px) brightness(0.97);
+      transition: opacity 0.45s cubic-bezier(.4,2,.6,1), transform 0.45s cubic-bezier(.4,2,.6,1), filter 0.45s cubic-bezier(.4,2,.6,1);
     }
     .form.active {
       display: flex;
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      filter: blur(0) brightness(1);
+      transition: opacity 0.45s cubic-bezier(.4,2,.6,1), transform 0.45s cubic-bezier(.4,2,.6,1), filter 0.45s cubic-bezier(.4,2,.6,1);
     }
     #authModal input {
       padding: 15px;
       font-size: 1.1em;
       border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.12);
-      backdrop-filter: blur(5px);
-      color: white;
+      border: 1.5px solid #23272e99;
+      background: rgba(44,52,70,0.18);
+      color: #e6eaf3;
       outline: none;
-      box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
+      box-shadow: 0 2px 8px #23272e11;
+      margin-bottom: 2px;
+      transition: border 0.2s, box-shadow 0.2s, background 0.2s;
     }
-    #authModal input::placeholder { color: rgba(255,255,255,0.6); }
+    #authModal input:focus {
+      border: 1.5px solid #3fa7ff;
+      box-shadow: 0 0 0 2px #3fa7ff33;
+      background: #23272e;
+      color: #fff;
+    }
+    #authModal input::placeholder { color: #7e8ba3; }
     #authModal button {
       padding: 15px;
       font-size: 1.1em;
       border: none;
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: white;
+      background: #23272e;
+      color: #e6eaf3;
       font-weight: bold;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      box-shadow: inset 0 0 15px rgba(255,255,255,0.25), 0 4px 20px rgba(0,0,0,0.4);
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 20px #23272e22, 0 2px 8px #23272e11;
+      transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
     }
     #authModal button::before {
       content: "";
@@ -311,15 +331,16 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.5) 0%, transparent 70%);
-      opacity: 0.2;
+      background: radial-gradient(circle at center, rgba(63,167,255,0.08) 0%, transparent 70%);
+      opacity: 0.13;
       transform: translate(-50%, -50%) rotate(0deg);
-      transition: transform 0.5s ease;
+      transition: transform 0.5s;
     }
     #authModal button:hover::before { transform: translate(-50%, -50%) rotate(25deg); }
     #authModal button:hover {
-      transform: scale(1.03);
-      box-shadow: inset 0 0 20px rgba(255,255,255,0.35), 0 6px 25px rgba(0,0,0,0.5);
+      transform: scale(1.04);
+      background: #23272e;
+      box-shadow: 0 6px 25px #23272e22, 0 2px 8px #3fa7ff11;
     }
   </style>
   <button class="app-button" id="openProfile" style="display:none;">Профиль</button>
@@ -352,7 +373,7 @@
       <input type="password" id="registerPassword" placeholder="Пароль" required>
       <button type="submit" id="registerSubmit">Зарегистрироваться</button>
     </form>
-  <button class="close-btn" id="closeAuth" style="position:absolute;right:18px;top:18px;font-size:1.1rem;background:none;border:none;cursor:pointer;">×</button>
+  <button class="close-btn" id="closeAuth" style="position:absolute;right:18px;top:18px;font-size:2.1rem;background:none;border:none;cursor:pointer;z-index:10;line-height:1;width:38px;height:38px;display:flex;align-items:center;justify-content:center;transition:background .18s;">×</button>
   </div>
 </div>
 <!-- PROFILE -->
@@ -368,6 +389,18 @@
       <button id="editNickBtn" class="edit-nick-btn" title="Сменить ник">✏️</button>
       <span id="profileRoleBadge" class="role-label">Пользователь</span>
     </div>
+    <div style="margin:6px 0">Почта: <span id="profileEmail"></span></div>
+    <div style="margin:6px 0">
+      <input id="changeAvatarInput" type="file" accept="image/*" style="display:none" />
+      <!-- Смена пароля -->
+      <div class="profile-pass-row">
+        <input id="newPasswordInput" class="input-gray" type="password" placeholder="Новый пароль">
+        <button id="changePasswordBtn" class="app-button">Сменить пароль</button>
+      </div>
+    </div>
+    <button id="logoutBtn" class="modal-main-btn" style="margin-top:10px;background:#e74c3c">Выйти</button>
+  </div>
+</div>
 <!-- POSTS MODAL -->
 <div id="postsModal" class="modal" style="background:rgba(0,0,0,.45);align-items:flex-start;justify-content:center;">
   <div class="chat-window" style="max-width:1100px;width:95vw;height:80vh;margin-top:64px;">
@@ -405,16 +438,6 @@
     </div>
   </div>
 </div>
-    <div style="margin:6px 0">Почта: <span id="profileEmail"></span></div>
-    <div style="margin:6px 0">
-      <input id="changeAvatarInput" type="file" accept="image/*" style="display:none" />
-      <!-- Смена пароля -->
-      <div class="profile-pass-row">
-        <input id="newPasswordInput" class="input-gray" type="password" placeholder="Новый пароль">
-        <button id="changePasswordBtn" class="app-button">Сменить пароль</button>
-      </div>
-    </div>
-    <button id="logoutBtn" class="modal-main-btn" style="margin-top:10px;background:#e74c3c">Выйти</button>
   </div>
 </div>
 
@@ -482,10 +505,7 @@
     <h2>Новости</h2>
     <div style="text-align:left">
       <ul>
-        <li>2.0 Update -14-08-2025- Обновление!, добавлены новые приватные чаты, новый дизайн
-          в стиле Liquid Glass, новая авторизация, оптимизация скорости, новый профиль, #теги
-          Система чатов после хостинга может работать не корректно. Если сообщения не отправляються
-          после самого первого, не пугайтесь, это временно, Firebase до сих пор шалит.
+        <li>2.1 Update -15.05.2025- Информацию об обновлении смотреть в тг
         </li>
       </ul>
     </div>
@@ -871,7 +891,6 @@ function renderMessage(m){
   const container = document.createElement('div');
   container.className = 'msg-row';
   const u = usersCache[m.uid] || {};
-  const hashtag = u.hashtag ? `<span style="color:#3fa7ff;font-weight:700;margin-right:4px">${escapeHtml(u.hashtag)}</span>` : '';
   const nickname = m.nickname || u.nickname || '???';
   const avatar = m.avatar || u.avatar || avatarOf(nickname);
   const role = m.role || u.role || 'user';
@@ -883,7 +902,7 @@ function renderMessage(m){
     <img class="msg-avatar" src="${avatar}" alt="">
     <div style="flex:1;min-width:0">
       <div class="msg-head">
-        ${hashtag}<span class="msg-nick">${escapeHtml(nickname)}</span>
+        <span class="msg-nick">${escapeHtml(nickname)}</span>
         ${getRoleBadge(role)}
         <span class="msg-time">${fmtTime(m.timestamp||Date.now())}</span>
         ${editedMark}
@@ -930,7 +949,9 @@ function startEditMessage(m) {
   document.getElementById('editMsgSave').onclick = async () => {
     const newText = document.getElementById('editMsgInput').value.trim();
     if(!newText) return showToast('Сообщение не может быть пустым','error');
-    await update(ref(db, `privateChats/${currentChatId}/${m.key}`), { message: newText, edited: true });
+    // Firestore update
+    const msgRef = doc(fsdb, "chats", currentChatId, "messages", m.id || m.key);
+    await updateDoc(msgRef, { message: newText, edited: true });
     editMsgModal.remove();
   };
   document.getElementById('editMsgCancel').onclick = () => editMsgModal.remove();
@@ -1020,7 +1041,15 @@ if (changeAvatarBtn && avatarModal && closeAvatarModal && avatarUrlInput && appl
 // Открытие модалки постов
 async function openPostsModal() {
   // Закрыть все другие модалки (без undefined)
-  [authModal, profileModal, newsModal, chatPanel, userPickerModal, nickModal, addPostModal, commentsModal].filter(Boolean).forEach(hideModal);
+  [authModal, newsModal, chatPanel, userPickerModal, nickModal, addPostModal, commentsModal].filter(Boolean).forEach(hideModal);
+  // Явно закрыть профиль, если вдруг открыт
+  if (typeof profileModal !== 'undefined') hideModal(profileModal);
+  // Сбросить peerName и peerAvatar, если они есть (чтобы не было наложения чата)
+  if (peerName) peerName.textContent = 'Выберите чат';
+  if (peerAvatar) {
+    peerAvatar.src = '';
+    peerAvatar.classList.add('empty');
+  }
   await refreshUsersCache();
   setTimeout(()=>{ showModal(postsModal); }, 50);
   loadPosts();
@@ -1028,14 +1057,16 @@ async function openPostsModal() {
 
 // Гарантируем, что кнопка "Посты" всегда работает
 if (openPostsBtn) {
-  openPostsBtn.onclick = (e) => { e?.stopPropagation?.(); openPostsModal(); };
+  openPostsBtn.onclick = (e) => {
+    e?.stopPropagation?.();
+    openPostsModal();
+  };
 }
 
 // Открывать посты автоматически при загрузке страницы
 window.addEventListener('DOMContentLoaded', () => {
-  openPostsModal();
   // Сделать кнопку чата активной
-  if (openChatBtn) { ть1234567
+  if (openChatBtn) {
     openChatBtn.classList.remove('app-button-disabled');
     openChatBtn.removeAttribute('disabled');
     openChatBtn.style.pointerEvents = '';
@@ -1325,7 +1356,14 @@ sendCommentBtn.onclick = async () => {
 /* ======================== Events ======================== */
 openAuthBtn.onclick = ()=>{ showModal(authModal); };
 closeAuth.onclick = ()=> hideModal(authModal);
-openProfileBtn.onclick = ()=>{ if(curUser){ showModal(profileModal); } else showToast('Войдите', 'error'); };
+openProfileBtn.onclick = ()=>{
+  if(curUser){
+    // Открываем только профиль, никаких постов!
+    showModal(profileModal);
+    // Убедимся, что postsModal скрыт
+    if(typeof postsModal !== 'undefined') hideModal(postsModal);
+  } else showToast('Войдите', 'error');
+};
 closeProfile.onclick = ()=> hideModal(profileModal);
 openNewsBtn.onclick = ()=> showModal(newsModal);
 closeNews.onclick = ()=> hideModal(newsModal);
