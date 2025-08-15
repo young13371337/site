@@ -198,6 +198,17 @@
   </style>
 </head>
 <body>
+<!-- Модалка загрузки -->
+<div id="postLoadingModal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div style="background:#23272e;padding:32px 38px;border-radius:14px;box-shadow:0 2px 16px #0006;text-align:center;">
+    <div class="loader" style="margin-bottom:14px;"></div>
+    <div style="color:#fff;font-size:1.15em;">Публикация поста...</div>
+  </div>
+</div>
+<style>
+.loader {border: 4px solid #23272e;border-top: 4px solid #3fa7ff;border-radius: 50%;width: 36px;height: 36px;animation: spin 1s linear infinite;margin:auto;}
+@keyframes spin {0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);}}
+</style>
 <header>
   <div class="logo">young1337</div>
   <nav class="header-nav">
@@ -374,11 +385,11 @@
 <!-- ADD POST MODAL -->
 <div id="addPostModal" class="modal">
   <div class="modal-content-gray" style="max-width:420px">
-    <button class="close-btn" id="closeAddPost">×</button>
-    <h2>Новый пост</h2>
-    <input id="postImageInput" type="file" accept="image/*" style="margin-bottom:10px">
-    <textarea id="postTextInput" class="input-gray" placeholder="Текст поста" style="height:80px"></textarea>
-    <button id="publishPostBtn" class="modal-main-btn">Опубликовать</button>
+  <button class="close-btn" id="closeAddPost">×</button>
+  <h2>Новый пост</h2>
+  <input id="postImageUrlInput" class="input-gray" placeholder="Ссылка на фото (https://...)" style="margin-bottom:10px">
+  <textarea id="postTextInput" class="input-gray" placeholder="Текст поста" style="height:80px"></textarea>
+  <button id="publishPostBtn" class="modal-main-btn">Опубликовать</button>
   </div>
 </div>
 
@@ -414,6 +425,20 @@
     <h2>Сменить ник</h2>
     <input id="nicknameInput" class="input-gray" placeholder="Новый никнейм">
     <button id="saveNicknameBtn" class="modal-main-btn">Сохранить</button>
+  </div>
+</div>
+
+<!-- Модалка смены аватара -->
+<div id="avatarModal" class="modal">
+  <div class="modal-content-gray" style="max-width:340px">
+    <button class="close-btn" id="closeAvatarModal">×</button>
+    <h2>Смена аватара</h2>
+    <input id="avatarUrlInput" class="input-gray" placeholder="Ссылка на фото (https://...)" style="margin-bottom:10px" />
+    <div style="margin-bottom:10px;">
+      <img id="avatarPreviewImg" src="" alt="avatar preview" style="display:none;max-width:120px;max-height:120px;border-radius:50%;margin:auto;box-shadow:0 2px 8px #0003;">
+      <div id="avatarPreviewError" style="color:#e74c3c;font-size:.98em;display:none;margin-top:6px;">Не удалось загрузить картинку</div>
+    </div>
+    <button id="applyAvatarBtn" class="modal-main-btn">Применить</button>
   </div>
 </div>
 
@@ -468,10 +493,11 @@
 </div>
 
 <script type="module">
+
+import { getDatabase, get, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { getFirestore, collection, query as fsQuery, orderBy as fsOrderBy, onSnapshot, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-/* ======================== Firebase ======================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, off, remove, set, update, get, child, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { getDocs, updateDoc, deleteDoc, doc as fsDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
@@ -548,7 +574,7 @@ const addPostBtn = document.getElementById('addPostBtn');
 const postsList = document.getElementById('postsList');
 const addPostModal = document.getElementById('addPostModal');
 const closeAddPost = document.getElementById('closeAddPost');
-const postImageInput = document.getElementById('postImageInput');
+const postImageUrlInput = document.getElementById('postImageUrlInput');
 const postTextInput = document.getElementById('postTextInput');
 const publishPostBtn = document.getElementById('publishPostBtn');
 const commentsModal = document.getElementById('commentsModal');
@@ -823,7 +849,7 @@ async function sendMessage() {
   ]);
 }
 
-// Для Firestore
+
 
 /* ======================== Open chat & messages ======================== */
 function openChatPanel(){
@@ -947,18 +973,48 @@ changePasswordBtn.onclick = async ()=>{
   }catch(e){ showToast('Ошибка: '+e.message,'error'); }
 };
 // Смена аватарки
-changeAvatarBtn.onclick = ()=> changeAvatarInput.click();
-changeAvatarInput.onchange = async (e)=>{
-  if(!curUser) return;
-  const file = e.target.files[0]; if(!file) return;
-  const fileRef = sRef(storage, `avatars/${curUser.uid}.jpg`);
-  await uploadBytes(fileRef, file);
-  const url = await getDownloadURL(fileRef);
-  await update(ref(db, 'users/'+curUser.uid), { avatar:url });
-  profileAvatar.src = url;
-  await refreshUsersCache();
-  showToast('Аватар обновлён','success');
-};
+// Смена аватарки теперь только по ссылке через модалку
+// DOM-элементы для модалки смены аватара по ссылке
+const avatarModal = document.getElementById('avatarModal');
+const closeAvatarModal = document.getElementById('closeAvatarModal');
+const avatarUrlInput = document.getElementById('avatarUrlInput');
+const applyAvatarBtn = document.getElementById('applyAvatarBtn');
+const avatarPreviewImg = document.getElementById('avatarPreviewImg');
+const avatarPreviewError = document.getElementById('avatarPreviewError');
+if (changeAvatarBtn && avatarModal && closeAvatarModal && avatarUrlInput && applyAvatarBtn && avatarPreviewImg && avatarPreviewError) {
+  changeAvatarBtn.onclick = () => {
+    avatarUrlInput.value = '';
+    avatarPreviewImg.style.display = 'none';
+    avatarPreviewError.style.display = 'none';
+    showModal(avatarModal);
+  };
+  closeAvatarModal.onclick = () => hideModal(avatarModal);
+  avatarUrlInput.oninput = () => {
+    const url = avatarUrlInput.value.trim();
+    avatarPreviewImg.style.display = 'none';
+    avatarPreviewError.style.display = 'none';
+    if (/^https?:\/\//.test(url)) {
+      avatarPreviewImg.src = url;
+      avatarPreviewImg.onload = () => { avatarPreviewImg.style.display = 'block'; avatarPreviewError.style.display = 'none'; };
+      avatarPreviewImg.onerror = () => { avatarPreviewImg.style.display = 'none'; avatarPreviewError.style.display = 'block'; };
+    }
+  };
+  applyAvatarBtn.onclick = async () => {
+    if (!curUser) return;
+    const url = avatarUrlInput.value.trim();
+    if (!/^https?:\/\//.test(url)) return showToast('Некорректная ссылка на фото', 'error');
+    if (avatarPreviewImg.style.display !== 'block') {
+      avatarPreviewError.style.display = 'block';
+      return;
+    }
+    await updateDoc(fsDoc(fsdb, "users", curUser.uid), { avatar: url });
+    curUserData.avatar = url;
+    profileAvatar.src = url;
+    await refreshUsersCache();
+    hideModal(avatarModal);
+    showToast('Аватар обновлён', 'success');
+  };
+}
 
 /* ======================== POSTS ======================== */
 // Открытие модалки постов
@@ -969,23 +1025,29 @@ async function openPostsModal() {
   setTimeout(()=>{ showModal(postsModal); }, 50);
   loadPosts();
 }
-openPostsBtn.onclick = (e) => { e?.stopPropagation?.(); openPostsModal(); };
+
+// Гарантируем, что кнопка "Посты" всегда работает
+if (openPostsBtn) {
+  openPostsBtn.onclick = (e) => { e?.stopPropagation?.(); openPostsModal(); };
+}
 
 // Открывать посты автоматически при загрузке страницы
 window.addEventListener('DOMContentLoaded', () => {
   openPostsModal();
   // Сделать кнопку чата активной
-  openChatBtn.classList.remove('app-button-disabled');
-  openChatBtn.removeAttribute('disabled');
-  openChatBtn.style.pointerEvents = '';
-  openChatBtn.style.opacity = '';
+  if (openChatBtn) { ть1234567
+    openChatBtn.classList.remove('app-button-disabled');
+    openChatBtn.removeAttribute('disabled');
+    openChatBtn.style.pointerEvents = '';
+    openChatBtn.style.opacity = '';
+  }
 });
-closePosts.onclick = (e) => { e?.stopPropagation?.(); hideModal(postsModal); };
+if (closePosts) closePosts.onclick = (e) => { e?.stopPropagation?.(); hideModal(postsModal); };
 
 // Открытие модалки создания поста
 addPostBtn.onclick = (e) => {
   e?.stopPropagation?.();
-  postImageInput.value = '';
+  postImageUrlInput.value = '';
   postTextInput.value = '';
   showModal(addPostModal);
 };
@@ -993,48 +1055,50 @@ closeAddPost.onclick = (e) => { e?.stopPropagation?.(); hideModal(addPostModal);
 
 // Публикация поста
 publishPostBtn.onclick = async (e) => {
-  e?.stopPropagation?.();
-  if (!curUser) return showToast('Войдите', 'error');
-  const text = postTextInput.value.trim();
-  if (!text) return showToast('Введите текст', 'error');
-  let imageUrl = '';
-  const file = postImageInput.files[0];
-  if (file) {
-    const fileRef = sRef(storage, `posts/${curUser.uid}_${Date.now()}.jpg`);
-    await uploadBytes(fileRef, file);
-    imageUrl = await getDownloadURL(fileRef);
-  }
-  const postRef = push(ref(db, 'posts'));
-  await set(postRef, {
-    uid: curUser.uid,
-    nickname: curUserData.nickname || curUser.email.split('@')[0],
-    avatar: curUserData.avatar || '',
-    role: curUserData.role || 'user',
-    text,
-    image: imageUrl,
-    timestamp: Date.now(),
-    views: {},
-    likes: {},
-    comments: {}
-  });
-  // Закрыть только модалку добавления поста, открыть только посты
+  const postLoadingModal = document.getElementById('postLoadingModal');
+  postLoadingModal.style.display = 'flex';
+  try {
+    e?.stopPropagation?.();
+    if (!curUser) throw new Error('Войдите');
+    const text = postTextInput.value.trim();
+    const imageUrl = postImageUrlInput.value.trim();
+    if (!text) throw new Error('Введите текст');
+    let imageField = '';
+    if (imageUrl && /^https?:\/\//.test(imageUrl)) imageField = imageUrl;
+    await addDoc(collection(fsdb, "posts"), {
+      uid: curUser.uid,
+      nickname: curUserData.nickname || curUser.email.split('@')[0],
+      avatar: curUserData.avatar || '',
+      role: curUserData.role || 'user',
+      text,
+      image: imageField,
+      timestamp: Date.now(),
+      views: [],
+      likes: [],
+      comments: []
+    });
   hideModal(addPostModal);
-  openPostsModal();
+  await loadPosts();
   showToast('Пост опубликован', 'success');
+  } catch (err) {
+    showToast('Ошибка: ' + (err?.message || err), 'error');
+  } finally {
+    postLoadingModal.style.display = 'none';
+  }
 };
 
 // Загрузка и рендер постов
 async function loadPosts() {
   postsList.innerHTML = '<div style="color:#aaa;text-align:center;margin-top:16px">Загрузка…</div>';
-  const snap = await get(ref(db, 'posts'));
-  if (!snap.exists()) {
+  const snap = await getDocs(fsQuery(collection(fsdb, "posts"), fsOrderBy("timestamp", "desc")));
+  if (snap.empty) {
     postsList.innerHTML = '<div style="color:#666;text-align:center;margin-top:16px">Постов пока нет.</div>';
     return;
   }
-  const arr = Object.entries(snap.val()).map(([key, val]) => ({ key, ...val }));
-  arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   postsList.innerHTML = '';
-  arr.forEach(post => renderPost(post));
+  snap.forEach(docSnap => {
+    renderPost({ key: docSnap.id, ...docSnap.data() });
+  });
 }
 
 function renderPost(post) {
@@ -1048,6 +1112,15 @@ function renderPost(post) {
   const postDiv = document.createElement('div');
   postDiv.className = 'post-item';
   postDiv.style = 'background:#23272e;border-radius:10px;padding:14px 14px 10px 14px;margin-bottom:16px;box-shadow:0 2px 8px #0001;position:relative;max-width:600px;margin-left:auto;margin-right:auto;';
+  let postImgTag = '';
+  if (post.image && /^https?:\/\//.test(post.image)) {
+    postImgTag = `<img src="${post.image}" alt="post" style="max-width:100%;border-radius:8px;margin-bottom:8px;">`;
+  }
+  // Получаем количество комментариев
+  let commentsCount = 0;
+  if (post.comments && typeof post.comments === 'object') {
+    commentsCount = Object.keys(post.comments).length;
+  }
   postDiv.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
       <img src="${avatar}" alt="avatar" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #3fa7ff;">
@@ -1056,13 +1129,14 @@ function renderPost(post) {
       <div style="color:#aaa;font-size:.93em;margin-left:auto;">${fmtTime(post.timestamp)}</div>
       ${mine ? `<button class="delete-post-btn" title="Удалить пост" style="background:none;border:none;color:#e74c3c;font-size:1.3em;cursor:pointer;margin-left:10px;">🗑</button>` : ''}
     </div>
-    ${post.image ? `<img src="${post.image}" alt="post" style="max-width:100%;border-radius:8px;margin-bottom:8px;">` : ''}
+    ${postImgTag}
     <div style="color:#fff;font-size:1.08em;margin-bottom:8px;text-align:left;">${escapeHtml(post.text)}</div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
       <span style="color:#aaa;font-size:.97em;">👁 ${views}</span>
       <button class="like-btn" data-key="${post.key}" style="background:none;border:none;color:${liked ? '#3fa7ff' : '#aaa'};font-size:1.08em;cursor:pointer;">❤ ${likes}</button>
+      <button class="comments-toggle-btn" data-key="${post.key}" style="background:none;border:none;color:#aaa;font-size:1.08em;cursor:pointer;">💬 Комментарии (${commentsCount})</button>
     </div>
-    <div class="vk-comments" id="vk-comments-${post.key}" style="background:#23272e;padding:0 0 0 0;margin:0 0 0 0;"></div>
+    <div class="vk-comments" id="vk-comments-${post.key}" style="display:none;background:#23272e;padding:0 0 0 0;margin:0 0 0 0;"></div>
   `;
   // Лайк
   postDiv.querySelector('.like-btn').onclick = () => toggleLike(post.key, liked);
@@ -1070,17 +1144,27 @@ function renderPost(post) {
   if(mine) {
     postDiv.querySelector('.delete-post-btn').onclick = async () => {
       if(confirm('Удалить этот пост?')) {
-        await remove(ref(db, `posts/${post.key}`));
+        await deleteDoc(fsDoc(fsdb, "posts", post.key));
         loadPosts();
       }
     };
   }
   // Просмотр
-  if (curUser && (!post.views || !post.views[curUser.uid])) {
-    update(ref(db, `posts/${post.key}/views`), { [curUser.uid]: true });
+  if (curUser && (!post.views || !post.views.includes(curUser.uid))) {
+    const postRef = fsDoc(fsdb, "posts", post.key);
+    updateDoc(postRef, { views: [...(post.views || []), curUser.uid] });
   }
-  // Встраиваем комментарии прямо под постом
-  renderInlineComments(post.key, postDiv.querySelector('.vk-comments'));
+  // Кнопка открытия/закрытия комментариев
+  const commentsBtn = postDiv.querySelector('.comments-toggle-btn');
+  const commentsBlock = postDiv.querySelector('.vk-comments');
+  let commentsVisible = false;
+  commentsBtn.onclick = () => {
+    commentsVisible = !commentsVisible;
+    commentsBlock.style.display = commentsVisible ? 'block' : 'none';
+    if (commentsVisible) {
+      renderInlineComments(post.key, commentsBlock);
+    }
+  };
   postsList.appendChild(postDiv);
 }
 
@@ -1094,8 +1178,10 @@ async function renderInlineComments(postKey, container) {
     arr.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
   }
   container.innerHTML = '';
+  const commentsWrap = document.createElement('div');
+  commentsWrap.style = 'display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto;';
   if(arr.length === 0) {
-    container.innerHTML = '<div style="color:#666;text-align:left;margin:4px 0 8px 0;">Комментариев пока нет.</div>';
+    commentsWrap.innerHTML = '<div style="color:#666;text-align:left;margin:4px 0 8px 0;">Комментариев пока нет.</div>';
   } else {
     arr.slice(-3).forEach(c => {
       const avatar = c.avatar || avatarOf(c.nickname);
@@ -1112,9 +1198,12 @@ async function renderInlineComments(postKey, container) {
           <span style="color:#fff;margin-left:10px;word-break:break-word;">${escapeHtml(c.text)}</span>
         </div>
       `;
-      container.appendChild(div);
+      commentsWrap.appendChild(div);
     });
+    // Плавный скролл к последнему комментарию
+    setTimeout(()=>{ commentsWrap.scrollTop = commentsWrap.scrollHeight; }, 100);
   }
+  container.appendChild(commentsWrap);
   // Форма добавления комментария
   if(curUser) {
     const formDiv = document.createElement('div');
@@ -1124,21 +1213,41 @@ async function renderInlineComments(postKey, container) {
       <button class="app-button" id="inlineSendCommentBtn-${postKey}" style="padding:7px 14px;font-size:.98em;">Отправить</button>
     `;
     container.appendChild(formDiv);
-    formDiv.querySelector(`#inlineSendCommentBtn-${postKey}`).onclick = async () => {
-      const text = formDiv.querySelector(`#inlineCommentInput-${postKey}`).value.trim();
+    const input = formDiv.querySelector(`#inlineCommentInput-${postKey}`);
+    const btn = formDiv.querySelector(`#inlineSendCommentBtn-${postKey}`);
+    input.focus();
+    btn.onclick = async () => {
+      const text = input.value.trim();
       if(!text) return showToast('Введите комментарий', 'error');
-      const my = usersCache[curUser.uid] || curUserData || {};
-      const commentRef = push(ref(db, `posts/${postKey}/comments`));
-      await set(commentRef, {
-        uid: curUser.uid,
-        nickname: my.nickname || (curUser.email||'').split('@')[0],
-        avatar: my.avatar || '',
-        role: my.role || 'user',
-        text,
-        timestamp: Date.now()
-      });
-      renderInlineComments(postKey, container);
+      btn.disabled = true;
+      btn.textContent = 'Отправка...';
+      try {
+        const my = usersCache[curUser.uid] || curUserData || {};
+        const commentRef = push(ref(db, `posts/${postKey}/comments`));
+        await set(commentRef, {
+          uid: curUser.uid,
+          nickname: my.nickname || (curUser.email||'').split('@')[0],
+          avatar: my.avatar || '',
+          role: my.role || 'user',
+          text,
+          timestamp: Date.now()
+        });
+        input.value = '';
+        input.focus();
+        await renderInlineComments(postKey, container);
+      } catch(e) {
+        showToast('Ошибка отправки', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Отправить';
+      }
     };
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        btn.click();
+      }
+    });
   }
 }
 
@@ -1291,7 +1400,6 @@ tabs.forEach((tab, index) => {
   if(e.target===userPickerModal) hideModal(userPickerModal);
   if(e.target===chatPanel) hideModal(chatPanel);
 });
-// Кнопка и функция для удаления чата
 
 
 </script>
